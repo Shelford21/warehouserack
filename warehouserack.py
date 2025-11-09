@@ -77,9 +77,19 @@ selected_date = now.day
 # Safely slice rows B6:B27 (column index 1 since A=0, B=1)
 
 
-name_list = name.iloc[0:2700, 1].dropna().astype(str).tolist()  # B6:B27
+name_list = name["B"].dropna().unique().tolist()
 name_list.insert(0, "-")
-selected_name = st.selectbox("Pilih Nama:", name_list)
+selected_name = st.selectbox("Pilih Item:", name_list)
+
+if selected_name != "-":
+    # Filter column C based on selected item
+    options_for_selected = data.loc[data["B"] == selected_name, "C"].dropna().unique().tolist()
+    
+    if options_for_selected:
+        selected_option = st.selectbox("Pilih Opsi:", options_for_selected)
+        st.write(f"Kamu pilih: {selected_name} → {selected_option}")
+    else:
+        st.info("Tidak ada data di kolom C untuk item ini.")
 
 status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -283,6 +293,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
