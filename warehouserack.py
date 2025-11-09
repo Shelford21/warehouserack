@@ -79,16 +79,16 @@ selected_date = now.day
 sheet_warehouse = "WarehouseAlldata"
 sheet_layout = "layoutwarehouse2"
 
-# --- Load main data
-data = conn.read(worksheet=sheet_data, ttl=0)
+# --- Load Warehouse Data
+name = conn.read(worksheet=sheet_warehouse, ttl=0)
 
 # --- DROPDOWN 1: Column B
-name_list = data.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
+name_list = name.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
 name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih Item (Kolom B):", name_list)
 
 if selected_name != "-":
-    filtered_rows = data[data.iloc[:, 1] == selected_name]
+    filtered_rows = name[name.iloc[:, 1] == selected_name]
 
     # --- DROPDOWN 2: Column C
     option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
@@ -96,39 +96,46 @@ if selected_name != "-":
     selected_option = st.selectbox("Pilih Opsi (Kolom C):", option_list)
 
     if selected_option != "-":
-        # Find the row for this combination
+        # --- Find the exact row index
         row_index = filtered_rows.index[
             (filtered_rows.iloc[:, 2] == selected_option)
         ].tolist()
 
         if row_index:
-            idx = row_index[0]                # take first match
-            current_k = data.iloc[idx, 10]    # Column K
-            current_l = data.iloc[idx, 11]    # Column L
+            idx = row_index[0]
+
+            # --- Show editable K & L columns
+            current_k = name.iloc[idx, 10] if len(name.columns) > 10 else ""
+            current_l = name.iloc[idx, 11] if len(name.columns) > 11 else ""
 
             st.write("### Edit Kolom K dan L")
             new_k = st.text_input("Kolom K:", str(current_k))
             new_l = st.text_input("Kolom L:", str(current_l))
 
             if st.button("💾 Simpan Perubahan"):
-                # Update local DataFrame
-                data.iat[idx, 10] = new_k
-                data.iat[idx, 11] = new_l
+                # ✅ Update main sheet values
+                name.iat[idx, 10] = new_k
+                name.iat[idx, 11] = new_l
+                conn.update(worksheet=sheet_warehouse, data=name)
 
-                # --- Update main sheet (only that row)
-                conn.update(worksheet=sheet_data, data=data)
+                # ✅ Now safely update layoutwarehouse2 A1 only
+                layout = conn.read(worksheet=sheet_layout, ttl=0, header=None)
 
-                # --- Update layoutwarehouse A1 safely
-                layout_df = conn.read(worksheet=sheet_layout, ttl=0, header=None)
+                # Make sure layout DataFrame isn’t empty
+                if layout.empty:
+                    layout = pd.DataFrame([[""]])
+
+                # Only touch A1 (0,0)
                 if new_l.strip() == "" or new_l.strip() == "-":
-                    layout_df.iat[0, 0] = "x"
+                    layout.iat[0, 0] = "x"
                 else:
-                    layout_df.iat[0, 0] = ""
+                    layout.iat[0, 0] = ""
 
-                # ❗Instead of overwriting full sheet, push only that small frame back
-                conn.update(worksheet=sheet_layout, data=layout_df)
+                conn.update(worksheet=sheet_layout, data=layout)
 
-                st.success("✅ Data Kolom K/L dan layoutwarehouse A1 berhasil diperbarui!")
+                st.success("✅ Kolom K/L diperbarui dan layoutwarehouse2!A1 disesuaikan.")
+
+
 status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 status_list = ["-", "Hadir", "Ijin", "Sakit"]
 selected_status = st.selectbox("Pilih Status:", status_list)
@@ -331,6 +338,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
