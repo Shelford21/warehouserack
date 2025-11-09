@@ -81,18 +81,25 @@ name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih Item:", name_list)
 
 if selected_name != "-":
-    # Filter rows where column 1 (B) matches the selected name
+    # Filter for rows with this name
     filtered_rows = data[data.iloc[:, 1] == selected_name]
 
-    # Get the corresponding values from column C (index 2)
-    options_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
+    # --- SECOND DROPDOWN (Column C) ---
+    option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
+    option_list.insert(0, "-")
+    selected_option = st.selectbox("Pilih Opsi (Kolom C):", option_list, key="selected_option")
 
-    if options_list:
-        selected_option = st.selectbox("Pilih Opsi:", options_list)
-        st.write(f"Kamu pilih: {selected_name} → {selected_option}")
-    else:
-        st.info("Tidak ada data di kolom C untuk item ini.")
+    if selected_option != "-":
+        # Filter for rows with both selected_name and selected_option
+        filtered_rows_2 = filtered_rows[filtered_rows.iloc[:, 2] == selected_option]
 
+        # --- THIRD DROPDOWN (Column D) ---
+        detail_list = filtered_rows_2.iloc[:, 3].dropna().astype(str).unique().tolist()
+        detail_list.insert(0, "-")
+        selected_detail = st.selectbox("Pilih Detail (Kolom D):", detail_list, key="selected_detail")
+
+        if selected_detail != "-":
+            st.success(f"Kamu pilih: {selected_name} → {selected_option} → {selected_detail}")
 
 status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -296,6 +303,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
