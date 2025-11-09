@@ -76,8 +76,7 @@ selected_date = now.day
 
 # Safely slice rows B6:B27 (column index 1 since A=0, B=1)
 
-
-name_list = name["B"].dropna().unique().tolist()
+name_list = data.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
 name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih Item:", name_list)
 
@@ -297,6 +296,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
