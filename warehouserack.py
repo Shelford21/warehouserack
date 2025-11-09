@@ -30,7 +30,7 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 # conn.update(worksheet=urlp, data=urlp)
 
 #data = conn.read(spreadsheet=url, worksheet="1750077145")
-data = conn.read(worksheet=url)
+#data = conn.read(worksheet=url)
 
 name= conn.read(worksheet=url)
 
@@ -354,6 +354,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
