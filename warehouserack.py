@@ -129,8 +129,8 @@ if selected_name != "-":
 
                         # Find the rack in layout sheet
                         target_rows = layout_df[
-                            (layout_df.iloc[:, 16] == rack_letter) &  # Q4 (index 16 if 0-based)
-                            (layout_df.iloc[:, 16 - 1] == rack_number)  # Q3 (index 15)
+                            (layout_df.iloc[:, 17] == rack_letter) &  # Q4 (index 16 if 0-based)
+                            (layout_df.iloc[:, 17 - 1] == rack_number)  # Q3 (index 15)
                         ]
 
                         if not target_rows.empty:
@@ -354,6 +354,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
