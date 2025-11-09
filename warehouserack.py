@@ -89,7 +89,7 @@ rack_ranges = {
     "R31": "W22:Y24"
 }
 
-# --- First dropdown: column B (Item name)
+# --- Dropdown: Column B ---
 name_list = name.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
 name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih Item (Kolom B):", name_list)
@@ -97,68 +97,83 @@ selected_name = st.selectbox("Pilih Item (Kolom B):", name_list)
 if selected_name != "-":
     filtered_rows = name[name.iloc[:, 1] == selected_name]
 
-    # --- Second dropdown: column C (Option)
+    # --- Dropdown: Column C ---
     option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
     selected_option = st.selectbox("Pilih Opsi (Kolom C):", option_list)
 
     if selected_option != "-":
-        # Find matching row
         row_index = filtered_rows.index[filtered_rows.iloc[:, 2] == selected_option].tolist()
 
         if row_index:
             idx = row_index[0]
 
-            current_k = name.iloc[idx, 10] if len(name.columns) > 10 else ""
-            current_l = name.iloc[idx, 11] if len(name.columns) > 11 else ""
+            current_k = str(name.iloc[idx, 10]) if len(name.columns) > 10 else ""
+            current_l = str(name.iloc[idx, 11]) if len(name.columns) > 11 else ""
 
             st.write("### Edit Kolom K dan L")
-            new_k = st.text_input("Kolom K:", str(current_k))
-            new_l = st.text_input("Kolom L:", str(current_l))
+            new_k = st.text_input("Kolom K:", current_k)
+            new_l = st.text_input("Kolom L:", current_l)
+
+            # --- Clean L input automatically ---
+            if new_l.strip():
+                # Replace any separator (comma, dash, space, semicolon) with a comma
+                cleaned = re.sub(r"[-\s;]+", ",", new_l)
+                cleaned = cleaned.replace(",,", ",").strip(",")
+                # Split into individual values
+                parts = [p.strip() for p in cleaned.split(",") if p.strip()]
+                # Rebuild into quoted list-style string
+                new_l = ",".join([f'"{p}"' for p in parts])
 
             if st.button("💾 Simpan Perubahan"):
-                # Update K/L in data
+                # --- Update only the selected row in WarehouseAlldata ---
                 name.iat[idx, 10] = new_k
                 name.iat[idx, 11] = new_l
                 conn.update(worksheet=sheet_warehouse, data=name)
 
-                # --- Update rack grid in same sheet ---
+                # --- Append "x" to grid number in same sheet ---
                 if new_k.strip() in rack_ranges:
                     range_str = rack_ranges[new_k.strip()]
+                    start_ref, end_ref = range_str.split(":")
 
-                    # Parse range "W18:Y20"
-                    start_col, start_row = re.findall(r"([A-Z]+)(\d+)", range_str.split(":")[0])[0]
-                    end_col, end_row = re.findall(r"([A-Z]+)(\d+)", range_str.split(":")[1])[0]
-                    start_row, end_row = int(start_row), int(end_row)
-
-                    # Convert column letters to numbers (A=1)
                     def col_to_num(col):
                         num = 0
                         for c in col:
-                            num = num * 26 + (ord(c.upper()) - ord('A') + 1)
+                            num = num * 26 + (ord(c.upper()) - ord("A") + 1)
                         return num
+
+                    start_col, start_row = re.findall(r"([A-Z]+)(\d+)", start_ref)[0]
+                    end_col, end_row = re.findall(r"([A-Z]+)(\d+)", end_ref)[0]
 
                     start_col_num = col_to_num(start_col)
                     end_col_num = col_to_num(end_col)
+                    start_row = int(start_row)
+                    end_row = int(end_row)
 
-                    # Load grid area from sheet
+                    # Extract grid area
                     grid = name.iloc[start_row - 1:end_row, start_col_num - 1:end_col_num].copy()
 
-                    # If L emptied, append 'x' to matching cell
-                    if new_l.strip() == "" or new_l.strip() == "-":
-                        grid = grid.applymap(lambda x: f"{x}x" if str(x).isdigit() and not str(x).endswith("x") else x)
-                    else:
-                        # If refilled, remove 'x' from that number
-                        grid = grid.applymap(lambda x: str(x).replace("x", "") if str(x).endswith("x") else x)
+                    # Only affect the cell matching previous L
+                    def mark_cell(val):
+                        if str(val).isdigit() and str(val) == str(current_l):
+                            if new_l.strip() == "" or new_l.strip() == "-":
+                                return f"{val}x"
+                            else:
+                                return str(val).replace("x", "")
+                        return val
 
-                    # Put grid back into main DataFrame
+                    grid = grid.applymap(mark_cell)
+
+                    # Write grid back
                     name.iloc[start_row - 1:end_row, start_col_num - 1:end_col_num] = grid
 
-                    # Update sheet
-                    conn.update(worksheet=sheet_warehouse, data=name)
+                    # ✅ Only update changed grid range (no Unnamed)
+                    conn.update(
+                        worksheet=sheet_warehouse,
+                        data=name.iloc[start_row - 1:end_row, start_col_num - 1:end_col_num],
+                    )
 
-                st.success("✅ Data dan grid di WarehouseAlldata berhasil diperbarui!")
-
+                st.success("✅ Berhasil menyimpan perubahan & format Kolom L otomatis!")
 
 status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -362,6 +377,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
