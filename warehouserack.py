@@ -79,37 +79,33 @@ selected_date = now.day
 sheet_warehouse = "WarehouseAlldata"
 sheet_layout = "layoutwarehouse"
 
-# Read both sheets
+# Read with header=None so A1 = [0,0]
 warehouse_df = conn.read(worksheet=sheet_warehouse, ttl=0)
-layout_df = conn.read(worksheet=sheet_layout, ttl=0)
+layout_df = conn.read(worksheet=sheet_layout, ttl=0, usecols=None, header=None)
 
-# --- Pick a row to edit ---
+# Choose a row to edit
 selected_row = st.number_input("Masukkan nomor baris:", min_value=1, max_value=len(warehouse_df), step=1)
-selected_index = selected_row - 1  # convert to 0-based index
+idx = selected_row - 1
 
-current_k = warehouse_df.iloc[selected_index, 10] if len(warehouse_df.columns) > 10 else ""
-current_l = warehouse_df.iloc[selected_index, 11] if len(warehouse_df.columns) > 11 else ""
+current_k = warehouse_df.iloc[idx, 10] if len(warehouse_df.columns) > 10 else ""
+current_l = warehouse_df.iloc[idx, 11] if len(warehouse_df.columns) > 11 else ""
 
 new_k = st.text_input("Kolom K:", str(current_k))
 new_l = st.text_input("Kolom L:", str(current_l))
 
 if st.button("💾 Simpan Perubahan"):
-    # Update local DataFrame
-    warehouse_df.iat[selected_index, 10] = new_k
-    warehouse_df.iat[selected_index, 11] = new_l
-
-    # Update main sheet
+    warehouse_df.iat[idx, 10] = new_k
+    warehouse_df.iat[idx, 11] = new_l
     conn.update(worksheet=sheet_warehouse, data=warehouse_df)
 
-    # If column L is empty → put "x" in layoutwarehouse!A1, else clear it
+    # --- Correctly edit A1 (top-left) ---
     if new_l.strip() == "" or new_l.strip() == "-":
-        layout_df.iat[0, 0] = "x"   # A1
+        layout_df.iat[0, 0] = "x"     # truly A1
     else:
-        layout_df.iat[0, 0] = ""    # clear A1
+        layout_df.iat[0, 0] = ""      # clear A1
 
     conn.update(worksheet=sheet_layout, data=layout_df)
-
-    st.success("✅ Data berhasil diperbarui, layoutwarehouse!A1 diubah sesuai kondisi kolom L.")
+    st.success("✅ layoutwarehouse!A1 diperbarui sesuai isi kolom L.")
 
 status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -313,6 +309,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
