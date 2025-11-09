@@ -76,55 +76,81 @@ selected_date = now.day
 
 # Safely slice rows B6:B27 (column index 1 since A=0, B=1)
 
-name_list = data.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
+sheet_warehouse = "WarehouseAlldata"
+sheet_layout = "layoutwarehouse"
+
+# Read both sheets
+warehouse_df = conn.read(worksheet=sheet_warehouse, ttl=0)
+layout_df = conn.read(worksheet=sheet_layout, ttl=0)
+
+# Dropdown logic (same as before)
+name_list = warehouse_df.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
 name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih Item:", name_list)
 
 if selected_name != "-":
-    filtered_rows = data[data.iloc[:, 1] == selected_name]
-
-    # --- DROPDOWN 2: Column C ---
+    filtered_rows = warehouse_df[warehouse_df.iloc[:, 1] == selected_name]
     option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
-    selected_option = st.selectbox("Pilih Opsi (Kolom C):", option_list)
+    selected_option = st.selectbox("Pilih Opsi:", option_list)
 
     if selected_option != "-":
         filtered_rows_2 = filtered_rows[filtered_rows.iloc[:, 2] == selected_option]
-
-        # --- DROPDOWN 3: Column D ---
         detail_list = filtered_rows_2.iloc[:, 3].dropna().astype(str).unique().tolist()
         detail_list.insert(0, "-")
-        selected_detail = st.selectbox("Pilih Detail (Kolom D):", detail_list)
+        selected_detail = st.selectbox("Pilih Detail:", detail_list)
 
         if selected_detail != "-":
-            # Find the specific row that matches all three
-            match = data[
-                (data.iloc[:, 1] == selected_name) &
-                (data.iloc[:, 2] == selected_option) &
-                (data.iloc[:, 3] == selected_detail)
+            match = warehouse_df[
+                (warehouse_df.iloc[:, 1] == selected_name) &
+                (warehouse_df.iloc[:, 2] == selected_option) &
+                (warehouse_df.iloc[:, 3] == selected_detail)
             ]
 
             if not match.empty:
-                row_index = match.index[0]  # Row in DataFrame
-                st.markdown("### ✏️ Edit Kolom K & L")
+                row_index = match.index[0]
 
                 current_k = match.iloc[0, 10] if len(match.columns) > 10 else ""
                 current_l = match.iloc[0, 11] if len(match.columns) > 11 else ""
 
-                new_k = st.text_input("Kolom K:", str(current_k))
-                new_l = st.text_input("Kolom L:", str(current_l))
+                new_k = st.text_input("Kolom K (Rack, ex: M24):", str(current_k))
+                new_l = st.text_input("Kolom L (Kolom nomor):", str(current_l))
 
                 if st.button("💾 Simpan Perubahan"):
-                    # Update local DataFrame
-                    data.iat[row_index, 10] = new_k
-                    data.iat[row_index, 11] = new_l
+                    # --- Update WarehouseAlldata ---
+                    warehouse_df.iat[row_index, 10] = new_k
+                    warehouse_df.iat[row_index, 11] = new_l
+                    conn.update(worksheet=sheet_warehouse, data=warehouse_df)
 
-                    # Push updates to Google Sheets
-                    conn.update(worksheet=url, data=data)
+                    # --- Update layoutwarehouse ---
+                    if new_k:
+                        rack_letter = ''.join([c for c in new_k if c.isalpha()])
+                        rack_number = ''.join([c for c in new_k if c.isdigit()])
 
-                    st.success(f"✅ Data berhasil diperbarui untuk {selected_name} → {selected_option} → {selected_detail}")
-            else:
-                st.warning("❗ Baris tidak ditemukan di data.")
+                        # Find the rack in layout sheet
+                        target_rows = layout_df[
+                            (layout_df.iloc[:, 16] == rack_letter) &  # Q4 (index 16 if 0-based)
+                            (layout_df.iloc[:, 16 - 1] == rack_number)  # Q3 (index 15)
+                        ]
+
+                        if not target_rows.empty:
+                            rack_row_idx = target_rows.index[0]
+                            # R2–V4 roughly columns 17–21 (adjust based on your layout)
+                            rack_cols = list(range(17, 22))
+
+                            # Find the cell matching the column number (e.g., 1..15)
+                            for c in rack_cols:
+                                val = str(layout_df.iat[rack_row_idx, c]).strip()
+                                if val == str(current_l):  # old col value
+                                    if new_l == "" or pd.isna(new_l):
+                                        layout_df.iat[rack_row_idx, c] = f"{val}x"
+                                    else:
+                                        layout_df.iat[rack_row_idx, c] = str(val).replace("x", "")
+                                    break
+
+                            conn.update(worksheet=sheet_layout, data=layout_df)
+
+                    st.success(f"✅ Data berhasil diperbarui dan layout warehouse disinkronkan.")
 
 status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -328,6 +354,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
