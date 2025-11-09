@@ -79,10 +79,17 @@ selected_date = now.day
 sheet_warehouse = "WarehouseAlldata"
 sheet_layout = "layoutwarehouse2"
 
-# --- Load Warehouse Data
-name = conn.read(worksheet=sheet_warehouse, ttl=0)
+rack_ranges = {
+    "U37": "U2:U4",         # vertical 3 cells
+    "T36": "W2:Y4",         # 3x3
+    "T35": "W6:Y8",
+    "S34": "W10:Y12",
+    "S33": "W14:Y16",
+    "R32": "W18:Y20",       # 3x5
+    "R31": "W22:Y24"
+}
 
-# --- DROPDOWN 1: Column B
+# --- First dropdown: column B (Item name)
 name_list = name.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
 name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih Item (Kolom B):", name_list)
@@ -90,21 +97,18 @@ selected_name = st.selectbox("Pilih Item (Kolom B):", name_list)
 if selected_name != "-":
     filtered_rows = name[name.iloc[:, 1] == selected_name]
 
-    # --- DROPDOWN 2: Column C
+    # --- Second dropdown: column C (Option)
     option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
     selected_option = st.selectbox("Pilih Opsi (Kolom C):", option_list)
 
     if selected_option != "-":
-        # --- Find the exact row index
-        row_index = filtered_rows.index[
-            (filtered_rows.iloc[:, 2] == selected_option)
-        ].tolist()
+        # Find matching row
+        row_index = filtered_rows.index[filtered_rows.iloc[:, 2] == selected_option].tolist()
 
         if row_index:
             idx = row_index[0]
 
-            # --- Show editable K & L columns
             current_k = name.iloc[idx, 10] if len(name.columns) > 10 else ""
             current_l = name.iloc[idx, 11] if len(name.columns) > 11 else ""
 
@@ -113,27 +117,47 @@ if selected_name != "-":
             new_l = st.text_input("Kolom L:", str(current_l))
 
             if st.button("💾 Simpan Perubahan"):
-                # ✅ Update main sheet values
+                # Update K/L in data
                 name.iat[idx, 10] = new_k
                 name.iat[idx, 11] = new_l
                 conn.update(worksheet=sheet_warehouse, data=name)
 
-                # ✅ Now safely update layoutwarehouse2 A1 only
-                layout = conn.read(worksheet=sheet_layout, ttl=0, header=None)
+                # --- Update rack grid in same sheet ---
+                if new_k.strip() in rack_ranges:
+                    range_str = rack_ranges[new_k.strip()]
 
-                # Make sure layout DataFrame isn’t empty
-                if layout.empty:
-                    layout = pd.DataFrame([[""]])
+                    # Parse range "W18:Y20"
+                    start_col, start_row = re.findall(r"([A-Z]+)(\d+)", range_str.split(":")[0])[0]
+                    end_col, end_row = re.findall(r"([A-Z]+)(\d+)", range_str.split(":")[1])[0]
+                    start_row, end_row = int(start_row), int(end_row)
 
-                # Only touch A1 (0,0)
-                if new_l.strip() == "" or new_l.strip() == "-":
-                    layout.iat[0, 0] = "x"
-                else:
-                    layout.iat[0, 0] = ""
+                    # Convert column letters to numbers (A=1)
+                    def col_to_num(col):
+                        num = 0
+                        for c in col:
+                            num = num * 26 + (ord(c.upper()) - ord('A') + 1)
+                        return num
 
-                conn.update(worksheet=sheet_layout, data=layout)
+                    start_col_num = col_to_num(start_col)
+                    end_col_num = col_to_num(end_col)
 
-                st.success("✅ Kolom K/L diperbarui dan layoutwarehouse2!A1 disesuaikan.")
+                    # Load grid area from sheet
+                    grid = name.iloc[start_row - 1:end_row, start_col_num - 1:end_col_num].copy()
+
+                    # If L emptied, append 'x' to matching cell
+                    if new_l.strip() == "" or new_l.strip() == "-":
+                        grid = grid.applymap(lambda x: f"{x}x" if str(x).isdigit() and not str(x).endswith("x") else x)
+                    else:
+                        # If refilled, remove 'x' from that number
+                        grid = grid.applymap(lambda x: str(x).replace("x", "") if str(x).endswith("x") else x)
+
+                    # Put grid back into main DataFrame
+                    name.iloc[start_row - 1:end_row, start_col_num - 1:end_col_num] = grid
+
+                    # Update sheet
+                    conn.update(worksheet=sheet_warehouse, data=name)
+
+                st.success("✅ Data dan grid di WarehouseAlldata berhasil diperbarui!")
 
 
 status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
@@ -338,6 +362,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
