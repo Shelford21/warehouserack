@@ -82,10 +82,10 @@ selected_name = st.selectbox("Pilih Item:", name_list)
 
 if selected_name != "-":
     # Filter for rows with this name
-    filtered_rows = data[data.iloc[:, 2] == selected_name]
+    filtered_rows = data[data.iloc[:, 1] == selected_name]
 
     # --- SECOND DROPDOWN (Column C) ---
-    option_list = filtered_rows.iloc[:, 1].dropna().astype(str).unique().tolist()
+    option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
     selected_option = st.selectbox("Pilih Opsi (Kolom C):", option_list, key="selected_option")
 
@@ -303,6 +303,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
