@@ -81,25 +81,50 @@ name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih Item:", name_list)
 
 if selected_name != "-":
-    # Filter for rows with this name
     filtered_rows = data[data.iloc[:, 1] == selected_name]
 
-    # --- SECOND DROPDOWN (Column C) ---
+    # --- DROPDOWN 2: Column C ---
     option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
-    selected_option = st.selectbox("Pilih Opsi (Kolom C):", option_list, key="selected_option")
+    selected_option = st.selectbox("Pilih Opsi (Kolom C):", option_list)
 
     if selected_option != "-":
-        # Filter for rows with both selected_name and selected_option
         filtered_rows_2 = filtered_rows[filtered_rows.iloc[:, 2] == selected_option]
 
-        # --- THIRD DROPDOWN (Column D) ---
+        # --- DROPDOWN 3: Column D ---
         detail_list = filtered_rows_2.iloc[:, 3].dropna().astype(str).unique().tolist()
         detail_list.insert(0, "-")
-        selected_detail = st.selectbox("Pilih Detail (Kolom D):", detail_list, key="selected_detail")
+        selected_detail = st.selectbox("Pilih Detail (Kolom D):", detail_list)
 
         if selected_detail != "-":
-            st.success(f"Kamu pilih: {selected_name} → {selected_option} → {selected_detail}")
+            # Find the specific row that matches all three
+            match = data[
+                (data.iloc[:, 1] == selected_name) &
+                (data.iloc[:, 2] == selected_option) &
+                (data.iloc[:, 3] == selected_detail)
+            ]
+
+            if not match.empty:
+                row_index = match.index[0]  # Row in DataFrame
+                st.markdown("### ✏️ Edit Kolom K & L")
+
+                current_k = match.iloc[0, 10] if len(match.columns) > 10 else ""
+                current_l = match.iloc[0, 11] if len(match.columns) > 11 else ""
+
+                new_k = st.text_input("Kolom K:", str(current_k))
+                new_l = st.text_input("Kolom L:", str(current_l))
+
+                if st.button("💾 Simpan Perubahan"):
+                    # Update local DataFrame
+                    data.iat[row_index, 10] = new_k
+                    data.iat[row_index, 11] = new_l
+
+                    # Push updates to Google Sheets
+                    conn.update(worksheet=url, data=data)
+
+                    st.success(f"✅ Data berhasil diperbarui untuk {selected_name} → {selected_option} → {selected_detail}")
+            else:
+                st.warning("❗ Baris tidak ditemukan di data.")
 
 status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -303,6 +328,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
