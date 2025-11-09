@@ -82,14 +82,18 @@ name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih Item:", name_list)
 
 if selected_name != "-":
-    # Filter column C based on selected item
-    options_for_selected = data.loc[data["B"] == selected_name, "C"].dropna().unique().tolist()
-    
-    if options_for_selected:
-        selected_option = st.selectbox("Pilih Opsi:", options_for_selected)
+    # Filter rows where column 1 (B) matches the selected name
+    filtered_rows = data[data.iloc[:, 1] == selected_name]
+
+    # Get the corresponding values from column C (index 2)
+    options_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
+
+    if options_list:
+        selected_option = st.selectbox("Pilih Opsi:", options_list)
         st.write(f"Kamu pilih: {selected_name} → {selected_option}")
     else:
         st.info("Tidak ada data di kolom C untuk item ini.")
+
 
 status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -293,6 +297,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
