@@ -107,40 +107,47 @@ if selected_name != "-":
     selected_option = st.selectbox("Pilih Kode:", option_list)
 
     if selected_option != "-":
-        # Find row that matches PO & Kode
-        row_index = filtered_rows.index[filtered_rows.iloc[:, 2] == selected_option].tolist()
+        kode_filtered = filtered_rows[filtered_rows.iloc[:, 2] == selected_option]
 
-        if row_index:
-            idx = row_index[0]
+        # --- Dropdown 3: Kolom D (Material) ---
+        material_list = kode_filtered.iloc[:, 3].dropna().astype(str).unique().tolist()
+        material_list.insert(0, "-")
+        selected_material = st.selectbox("Pilih Material (Kolom D):", material_list)
 
-            # --- Show current K and L values ---
-            current_k = str(name.iloc[idx, 10]) if len(name.columns) > 10 else ""
-            current_l = str(name.iloc[idx, 11]) if len(name.columns) > 11 else ""
+        if selected_material != "-":
+            row_index = kode_filtered.index[kode_filtered.iloc[:, 3] == selected_material].tolist()
 
-            st.write("### Edit rak dan Kolom ")
-            new_k = st.text_input("rak:", current_k)
-            new_l = st.text_input("Kolom:", current_l)
+            if row_index:
+                idx = row_index[0]
 
-            # --- Clean Kolom L automatically ---
-            if new_l.strip():
-                # Replace any separator (comma, dash, space, semicolon) with a comma
-                cleaned = re.sub(r"[-\s;]+", ",", new_l)
-                cleaned = cleaned.replace(",,", ",").strip(",")
-                # Split into individual values
-                parts = [p.strip() for p in cleaned.split(",") if p.strip()]
-                # Rebuild into quoted list-style string
-                new_l = ",".join([f'"{p}"' for p in parts])
+                # --- Show current K and L values ---
+                current_k = str(name.iloc[idx, 10]) if len(name.columns) > 10 else ""
+                current_l = str(name.iloc[idx, 11]) if len(name.columns) > 11 else ""
 
-            # --- Save button ---
-            if st.button("💾 Simpan Perubahan"):
-                # Update selected row only
-                name.iat[idx, 10] = new_k
-                name.iat[idx, 11] = new_l
+                st.write("### Edit Rak dan Kolom")
+                new_k = st.text_input("Rak:", current_k)
+                new_l = st.text_input("Kolom:", current_l)
 
-                # Save to Google Sheets
-                conn.update(worksheet=sheet_warehouse, data=name)
+                # --- Clean Kolom L automatically ---
+                if new_l.strip():
+                    # Replace any separator (comma, dash, space, semicolon) with a comma
+                    cleaned = re.sub(r"[-\s;]+", ",", new_l)
+                    cleaned = cleaned.replace(",,", ",").strip(",")
+                    # Split into individual values
+                    parts = [p.strip() for p in cleaned.split(",") if p.strip()]
+                    # Rebuild into quoted list-style string
+                    new_l = ",".join([f'"{p}"' for p in parts])
 
-                st.success("✅ Data di WarehouseAlldata berhasil diperbarui & format Kolom L otomatis!")
+                # --- Save button ---
+                if st.button("💾 Simpan Perubahan"):
+                    # Update selected row only
+                    name.iat[idx, 10] = new_k
+                    name.iat[idx, 11] = new_l
+
+                    # Save to Google Sheets
+                    conn.update(worksheet=sheet_warehouse, data=name)
+
+                    st.success("✅ Data di WarehouseAlldata berhasil diperbarui & format Kolom L otomatis!")
 
 # status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 # status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -344,6 +351,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
