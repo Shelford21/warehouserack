@@ -355,41 +355,42 @@ if os.path.exists(CSV_FILE):
 # Divider
 st.markdown("---")
 
-# Admin section
-st.subheader("Khusus Admin")
+# # Admin section
+# st.subheader("Khusus Admin")
 
-# Ask for password first
-admin_password = st.text_input("Masukan password untuk menggunakan fitur:", type="password")
+# # Ask for password first
+# admin_password = st.text_input("Masukan password untuk menggunakan fitur:", type="password")
 
-# If password is correct, show expander
-if admin_password == ADMIN_PASSWORD:
-    with st.expander("🧹 Clear data alasan"):
-        if st.button("Clear Data"):
-            if os.path.exists(CSV_FILE):
-                os.remove(CSV_FILE)
-                st.success("✅ All data cleared successfully!")
-            else:
-                st.info("No data file found to clear.")
-    with st.expander("🚀 Unduh Absen"):
-        col1, col2 = st.columns(2)
-        with col1:
-            csv = dff.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="⬇️ absen report",
-                data=csv,
-                file_name="absen report.csv",
-                mime="text/csv")
+# # If password is correct, show expander
+# if admin_password == ADMIN_PASSWORD:
+#     with st.expander("🧹 Clear data alasan"):
+#         if st.button("Clear Data"):
+#             if os.path.exists(CSV_FILE):
+#                 os.remove(CSV_FILE)
+#                 st.success("✅ All data cleared successfully!")
+#             else:
+#                 st.info("No data file found to clear.")
+#     with st.expander("🚀 Unduh Absen"):
+#         col1, col2 = st.columns(2)
+#         with col1:
+#             csv = dff.to_csv(index=False).encode("utf-8")
+#             st.download_button(
+#                 label="⬇️ absen report",
+#                 data=csv,
+#                 file_name="absen report.csv",
+#                 mime="text/csv")
                 
-        with col2:
-            st.download_button(
-                label="⬇️ alasan ijin/sakit",
-                data=df_display.to_csv(index=False).encode('utf-8'),
-                file_name="alasan ijin/sakit.csv",
-                mime="text/csv")
+#         with col2:
+#             st.download_button(
+#                 label="⬇️ alasan ijin/sakit",
+#                 data=df_display.to_csv(index=False).encode('utf-8'),
+#                 file_name="alasan ijin/sakit.csv",
+#                 mime="text/csv")
     
-else:
-    if admin_password != "":
-        st.error("❌ Incorrect password.")
+# else:
+#     if admin_password != "":
+#         st.error("❌ Incorrect password.")
+
 
 
 
