@@ -146,11 +146,6 @@ if selected_name != "-":
                     conn.update(worksheet=sheet_warehouse, data=name)
                     st.success("✅ Data di WarehouseAlldata berhasil diperbarui!")
 
-# --- Clear cache button ---
-if st.button("🧹 Clear Cache"):
-    st.cache_data.clear()
-    st.success("Cache berhasil dibersihkan! 🔄")
-
 # ============================================
 # 🔹 SECTION 2 — Cari Berdasarkan Rak & Kolom
 # ============================================
@@ -390,6 +385,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
