@@ -92,7 +92,7 @@ rack_ranges = {
 # --- Dropdown: Column B ---
 name_list = name.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
 name_list.insert(0, "-")
-selected_name = st.selectbox("Pilih Item (Kolom B):", name_list)
+selected_name = st.selectbox("Pilih PO:", name_list)
 
 if selected_name != "-":
     filtered_rows = name[name.iloc[:, 1] == selected_name]
@@ -100,7 +100,7 @@ if selected_name != "-":
     # --- Dropdown: Column C ---
     option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
-    selected_option = st.selectbox("Pilih Opsi (Kolom C):", option_list)
+    selected_option = st.selectbox("Pilih Kode:", option_list)
 
     if selected_option != "-":
         row_index = filtered_rows.index[filtered_rows.iloc[:, 2] == selected_option].tolist()
@@ -377,6 +377,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
