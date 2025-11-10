@@ -175,117 +175,117 @@ if selected_name != "-":
 
                 st.success("✅ Berhasil menyimpan perubahan & format Kolom L otomatis!")
 
-status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
-status_list = ["-", "Hadir", "Ijin", "Sakit"]
-selected_status = st.selectbox("Pilih Status:", status_list)
+# status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
+# status_list = ["-", "Hadir", "Ijin", "Sakit"]
+# selected_status = st.selectbox("Pilih Status:", status_list)
 #selected_status = st.selectbox("Status Kehadiran:", list(status_map.keys()))
 # Text input
 
     
-if selected_status == "Ijin" and selected_name != "-":
-        user_input = st.text_input("Ketik alasan: (contoh: ijin kerja)")
-        if user_input.strip() == "":
-            st.warning("Tidak boleh kosong ok!")
-        else:
-            if os.path.exists(CSV_FILE):
-                df = pd.read_csv(CSV_FILE)
-            else:
-                df = pd.DataFrame(columns=["Text"])
+# if selected_status == "Ijin" and selected_name != "-":
+#         user_input = st.text_input("Ketik alasan: (contoh: ijin kerja)")
+#         if user_input.strip() == "":
+#             st.warning("Tidak boleh kosong ok!")
+#         else:
+#             if os.path.exists(CSV_FILE):
+#                 df = pd.read_csv(CSV_FILE)
+#             else:
+#                 df = pd.DataFrame(columns=["Text"])
         
-                # Add new submission
-            #new_row = pd.DataFrame({"Text":  f"{selected_name}" [user_input]})
-            new_row = pd.DataFrame({"Text": [f"{selected_name}: {user_input}"]})
-            df = pd.concat([df, new_row], ignore_index=True)
+#                 # Add new submission
+#             #new_row = pd.DataFrame({"Text":  f"{selected_name}" [user_input]})
+#             new_row = pd.DataFrame({"Text": [f"{selected_name}: {user_input}"]})
+#             df = pd.concat([df, new_row], ignore_index=True)
         
-                # Save to CSV
-            df.to_csv(CSV_FILE, index=False)
-elif selected_status == "Sakit" and selected_name != "-":
-        user_input = st.text_input("Ketik alasan: (contoh: sakit demam)")
-        if user_input.strip() == "":
-            st.warning("Tidak boleh kosong ok!")
-        else:
-            # Load or create dataframe
-            if os.path.exists(CSV_FILE):
-                df = pd.read_csv(CSV_FILE)
-            else:
-                df = pd.DataFrame(columns=["Text"])
+#                 # Save to CSV
+#             df.to_csv(CSV_FILE, index=False)
+# elif selected_status == "Sakit" and selected_name != "-":
+#         user_input = st.text_input("Ketik alasan: (contoh: sakit demam)")
+#         if user_input.strip() == "":
+#             st.warning("Tidak boleh kosong ok!")
+#         else:
+#             # Load or create dataframe
+#             if os.path.exists(CSV_FILE):
+#                 df = pd.read_csv(CSV_FILE)
+#             else:
+#                 df = pd.DataFrame(columns=["Text"])
     
-            # Add new submission
-            new_row = pd.DataFrame({"Text": [f"{selected_name}: {user_input}"]})
-            df = pd.concat([df, new_row], ignore_index=True)
+#             # Add new submission
+#             new_row = pd.DataFrame({"Text": [f"{selected_name}: {user_input}"]})
+#             df = pd.concat([df, new_row], ignore_index=True)
     
-            # Save to CSV
-            df.to_csv(CSV_FILE, index=False)
-elif selected_status == "Hadir" and selected_name != "-":
-        user_input = "Hadir"
-        if user_input.strip() == "":
-            st.warning("Tidak boleh kosong ok!")
-        else:
-            # Load or create dataframe
-            if os.path.exists(CSV_FILE):
-                df = pd.read_csv(CSV_FILE)
-            else:
-                df = pd.DataFrame(columns=["Text"])
+#             # Save to CSV
+#             df.to_csv(CSV_FILE, index=False)
+# elif selected_status == "Hadir" and selected_name != "-":
+#         user_input = "Hadir"
+#         if user_input.strip() == "":
+#             st.warning("Tidak boleh kosong ok!")
+#         else:
+#             # Load or create dataframe
+#             if os.path.exists(CSV_FILE):
+#                 df = pd.read_csv(CSV_FILE)
+#             else:
+#                 df = pd.DataFrame(columns=["Text"])
     
-            # Add new submission
-            new_row = pd.DataFrame({"Text": [f"{selected_name}: {user_input}"]})
-            df = pd.concat([df, new_row], ignore_index=True)
+#             # Add new submission
+#             new_row = pd.DataFrame({"Text": [f"{selected_name}: {user_input}"]})
+#             df = pd.concat([df, new_row], ignore_index=True)
     
-            # Save to CSV
-            df.to_csv(CSV_FILE, index=False)
+#             # Save to CSV
+#             df.to_csv(CSV_FILE, index=False)
 
-if st.button("Submit Kehadiran"):
-    # st.session_state["selected_name"] = "-"
-    # st.session_state["selected_status"] = "-"
-    # Find row for the selected name
-    name_row = name.index[name.iloc[:, 1] == selected_name].tolist()
-    # if user_input.strip() == "":
-    #     st.warning("Tidak boleh kosong ok!")
-    #else:
-    if selected_name == "-":
-        st.warning("⚠️ Silakan pilih nama terlebih dahulu.")
-    else:
-        if name_row:
-            row_idx = name_row[0]
-             # Column D=3 (0-based index), so date 1 = col 3
-            col_idx = 3 + (selected_date - 1)
+# if st.button("Submit Kehadiran"):
+#     # st.session_state["selected_name"] = "-"
+#     # st.session_state["selected_status"] = "-"
+#     # Find row for the selected name
+#     name_row = name.index[name.iloc[:, 1] == selected_name].tolist()
+#     # if user_input.strip() == "":
+#     #     st.warning("Tidak boleh kosong ok!")
+#     #else:
+#     if selected_name == "-":
+#         st.warning("⚠️ Silakan pilih nama terlebih dahulu.")
+#     else:
+#         if name_row:
+#             row_idx = name_row[0]
+#              # Column D=3 (0-based index), so date 1 = col 3
+#             col_idx = 3 + (selected_date - 1)
     
-            if selected_status == "-":
-                st.warning("Isi hadir/ijin/sakit ok")
-                if selected_status == "Ijin":
-                    if user_input == "" and selected_name == "-":
-                        st.warning("Tidak boleh kosong ok!")
-                    else:
-                        pass
-                if selected_status == "Sakit" :
-                    if user_input == "" and selected_name == "-":
-                        st.warning("Tidak boleh kosong ok!")
-                    else:
-                        pass
-            else:
-                name.iat[row_idx, col_idx] = status_map[selected_status]
+#             if selected_status == "-":
+#                 st.warning("Isi hadir/ijin/sakit ok")
+#                 if selected_status == "Ijin":
+#                     if user_input == "" and selected_name == "-":
+#                         st.warning("Tidak boleh kosong ok!")
+#                     else:
+#                         pass
+#                 if selected_status == "Sakit" :
+#                     if user_input == "" and selected_name == "-":
+#                         st.warning("Tidak boleh kosong ok!")
+#                     else:
+#                         pass
+#             else:
+#                 name.iat[row_idx, col_idx] = status_map[selected_status]
             
-                 # Update Google Sheet
+#                  # Update Google Sheet
                 
-                #st.success(f"✅ Kehadiran {selected_name} untuk tanggal {selected_date} tersimpan sebagai '{status_map[selected_status]}'")
-                if selected_status == "Hadir" and user_input and selected_name != "-":
-                    st.success(f"✅ جَزَاكُمُ اللهُ خَيْرًا {selected_name} - Semoga kehadiran hari ini dapat memberikan kebarokahan dan ilmu yang bermanfaat")
-                    conn.update(worksheet=url, data=name)
-                elif selected_status == "Ijin" and user_input and selected_name != "-":
-                    st.success(f"✅ جَزَاكُمُ اللهُ خَيْرًا {selected_name} - Semoga allah paring banyak kelonggaran waktu sehingga dapat hadir dijadwal sambung selanjutnya")
-                    conn.update(worksheet=url, data=name)
-                elif selected_status == "Sakit" and user_input and selected_name != "-":
-                    conn.update(worksheet=url, data=name)
-                    st.success(f"✅ جَزَاكُمُ اللهُ خَيْرًا {selected_name} - Semoga allah paring kesembuhan dan kesehatan yang barokah sehingga dapat hadir dijadwal sambung selanjutnya")
-                elif selected_status == "Ijin" and user_input == "" and selected_name == "-":
-                    st.warning("Tidak boleh kosong ok")
-                elif selected_status == "Ijin" and user_input == "" and selected_name == "-":
-                    st.warning("Tidak boleh kosong ok")
-                elif selected_status == "Sakit" and user_input == "" and selected_name == "-":
-                    st.warning("Tidak boleh kosong ok")
+#                 #st.success(f"✅ Kehadiran {selected_name} untuk tanggal {selected_date} tersimpan sebagai '{status_map[selected_status]}'")
+#                 if selected_status == "Hadir" and user_input and selected_name != "-":
+#                     st.success(f"✅ جَزَاكُمُ اللهُ خَيْرًا {selected_name} - Semoga kehadiran hari ini dapat memberikan kebarokahan dan ilmu yang bermanfaat")
+#                     conn.update(worksheet=url, data=name)
+#                 elif selected_status == "Ijin" and user_input and selected_name != "-":
+#                     st.success(f"✅ جَزَاكُمُ اللهُ خَيْرًا {selected_name} - Semoga allah paring banyak kelonggaran waktu sehingga dapat hadir dijadwal sambung selanjutnya")
+#                     conn.update(worksheet=url, data=name)
+#                 elif selected_status == "Sakit" and user_input and selected_name != "-":
+#                     conn.update(worksheet=url, data=name)
+#                     st.success(f"✅ جَزَاكُمُ اللهُ خَيْرًا {selected_name} - Semoga allah paring kesembuhan dan kesehatan yang barokah sehingga dapat hadir dijadwal sambung selanjutnya")
+#                 elif selected_status == "Ijin" and user_input == "" and selected_name == "-":
+#                     st.warning("Tidak boleh kosong ok")
+#                 elif selected_status == "Ijin" and user_input == "" and selected_name == "-":
+#                     st.warning("Tidak boleh kosong ok")
+#                 elif selected_status == "Sakit" and user_input == "" and selected_name == "-":
+#                     st.warning("Tidak boleh kosong ok")
                 
-        else:
-             st.error("Nama tidak ditemukan dalam daftar.")
+#         else:
+#              st.error("Nama tidak ditemukan dalam daftar.")
             
 if os.path.exists(CSV_FILE):
     st.subheader("Kehadiran hari ini:")
@@ -377,6 +377,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
