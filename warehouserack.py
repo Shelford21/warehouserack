@@ -93,7 +93,11 @@ if st.button("🧹 Clear Cache"):
     st.cache_resource.clear()
     st.success("✅ Cache berhasil dibersihkan!")
 
-# --- Dropdown: Column B ---
+# ============================================
+# 🔹 SECTION 1 — Edit Rak & Kolom (existing)
+# ============================================
+st.header("✏️ Edit Berdasarkan PO, Kode, dan Material")
+
 name_list = name.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
 name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih PO:", name_list)
@@ -101,7 +105,7 @@ selected_name = st.selectbox("Pilih PO:", name_list)
 if selected_name != "-":
     filtered_rows = name[name.iloc[:, 1] == selected_name]
 
-    # --- Dropdown 2: Kolom C (Kode) ---
+    # Dropdown 2: Kolom C (Kode)
     option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
     selected_option = st.selectbox("Pilih Kode:", option_list)
@@ -109,10 +113,10 @@ if selected_name != "-":
     if selected_option != "-":
         kode_filtered = filtered_rows[filtered_rows.iloc[:, 2] == selected_option]
 
-        # --- Dropdown 3: Kolom D (Material) ---
+        # Dropdown 3: Kolom D (Material)
         material_list = kode_filtered.iloc[:, 3].dropna().astype(str).unique().tolist()
         material_list.insert(0, "-")
-        selected_material = st.selectbox("Pilih Material:", material_list)
+        selected_material = st.selectbox("Pilih Material (Kolom D):", material_list)
 
         if selected_material != "-":
             row_index = kode_filtered.index[kode_filtered.iloc[:, 3] == selected_material].tolist()
@@ -130,24 +134,59 @@ if selected_name != "-":
 
                 # --- Clean Kolom L automatically ---
                 if new_l.strip():
-                    # Replace any separator (comma, dash, space, semicolon) with a comma
                     cleaned = re.sub(r"[-\s;]+", ",", new_l)
                     cleaned = cleaned.replace(",,", ",").strip(",")
-                    # Split into individual values
                     parts = [p.strip() for p in cleaned.split(",") if p.strip()]
-                    # Rebuild into quoted list-style string
                     new_l = ",".join([f'"{p}"' for p in parts])
 
                 # --- Save button ---
                 if st.button("💾 Simpan Perubahan"):
-                    # Update selected row only
                     name.iat[idx, 10] = new_k
                     name.iat[idx, 11] = new_l
-
-                    # Save to Google Sheets
                     conn.update(worksheet=sheet_warehouse, data=name)
+                    st.success("✅ Data di WarehouseAlldata berhasil diperbarui!")
 
-                    st.success("✅ Data di WarehouseAlldata berhasil diperbarui & format Kolom L otomatis!")
+# --- Clear cache button ---
+if st.button("🧹 Clear Cache"):
+    st.cache_data.clear()
+    st.success("Cache berhasil dibersihkan! 🔄")
+
+# ============================================
+# 🔹 SECTION 2 — Cari Berdasarkan Rak & Kolom
+# ============================================
+st.markdown("---")
+st.header("🔍 Cari Berdasarkan Rak & Kolom")
+
+# Dropdown for Rak (Kolom K)
+rak_list = name.iloc[:, 10].dropna().astype(str).unique().tolist()
+rak_list.insert(0, "-")
+selected_rak = st.selectbox("Pilih Rak (Kolom K):", rak_list)
+
+# Dropdown for Kolom (Kolom L)
+kolom_list = name.iloc[:, 11].dropna().astype(str).unique().tolist()
+kolom_list.insert(0, "-")
+selected_kolom = st.selectbox("Pilih Kolom (Kolom L):", kolom_list)
+
+if st.button("🔎 Tampilkan Data"):
+    if selected_rak != "-" and selected_kolom != "-":
+        # Filter matching rows
+        result = name[(name.iloc[:, 10] == selected_rak) & (name.iloc[:, 11] == selected_kolom)]
+
+        if not result.empty:
+            st.success(f"📍 Ditemukan {len(result)} data di Rak {selected_rak}, Kolom {selected_kolom}")
+            st.dataframe(result.iloc[:, [1, 2, 3, 10, 11]].rename(
+                columns={
+                    name.columns[1]: "PO",
+                    name.columns[2]: "Kode",
+                    name.columns[3]: "Material",
+                    name.columns[10]: "Rak",
+                    name.columns[11]: "Kolom",
+                }
+            ))
+        else:
+            st.warning("⚠️ Tidak ada data untuk Rak & Kolom tersebut.")
+    else:
+        st.info("Pilih Rak dan Kolom terlebih dahulu.")
 
 # status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 # status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -351,6 +390,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
