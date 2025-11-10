@@ -101,17 +101,19 @@ selected_name = st.selectbox("Pilih PO:", name_list)
 if selected_name != "-":
     filtered_rows = name[name.iloc[:, 1] == selected_name]
 
-    # --- Dropdown: Column C ---
+    # --- Dropdown 2: Kolom C (Kode) ---
     option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
     selected_option = st.selectbox("Pilih Kode:", option_list)
 
     if selected_option != "-":
+        # Find row that matches PO & Kode
         row_index = filtered_rows.index[filtered_rows.iloc[:, 2] == selected_option].tolist()
 
         if row_index:
             idx = row_index[0]
 
+            # --- Show current K and L values ---
             current_k = str(name.iloc[idx, 10]) if len(name.columns) > 10 else ""
             current_l = str(name.iloc[idx, 11]) if len(name.columns) > 11 else ""
 
@@ -119,7 +121,7 @@ if selected_name != "-":
             new_k = st.text_input("Kolom K:", current_k)
             new_l = st.text_input("Kolom L:", current_l)
 
-            # --- Clean L input automatically ---
+            # --- Clean Kolom L automatically ---
             if new_l.strip():
                 # Replace any separator (comma, dash, space, semicolon) with a comma
                 cleaned = re.sub(r"[-\s;]+", ",", new_l)
@@ -129,55 +131,16 @@ if selected_name != "-":
                 # Rebuild into quoted list-style string
                 new_l = ",".join([f'"{p}"' for p in parts])
 
+            # --- Save button ---
             if st.button("💾 Simpan Perubahan"):
-                # --- Update only the selected row in WarehouseAlldata ---
+                # Update selected row only
                 name.iat[idx, 10] = new_k
                 name.iat[idx, 11] = new_l
+
+                # Save to Google Sheets
                 conn.update(worksheet=sheet_warehouse, data=name)
 
-                # --- Append "x" to grid number in same sheet ---
-                if new_k.strip() in rack_ranges:
-                    range_str = rack_ranges[new_k.strip()]
-                    start_ref, end_ref = range_str.split(":")
-
-                    def col_to_num(col):
-                        num = 0
-                        for c in col:
-                            num = num * 26 + (ord(c.upper()) - ord("A") + 1)
-                        return num
-
-                    start_col, start_row = re.findall(r"([A-Z]+)(\d+)", start_ref)[0]
-                    end_col, end_row = re.findall(r"([A-Z]+)(\d+)", end_ref)[0]
-
-                    start_col_num = col_to_num(start_col)
-                    end_col_num = col_to_num(end_col)
-                    start_row = int(start_row)
-                    end_row = int(end_row)
-
-                    # Extract grid area
-                    grid = name.iloc[start_row - 1:end_row, start_col_num - 1:end_col_num].copy()
-
-                    # Only affect the cell matching previous L
-                    def mark_cell(val):
-                        if str(val).isdigit() and str(val) == str(current_l):
-                            if new_l.strip() == "" or new_l.strip() == "-":
-                                return f"{val}x"
-                            else:
-                                return str(val).replace("x", "")
-                        return val
-
-                    grid = grid.applymap(mark_cell)
-
-                    # Write grid back
-                    name.iloc[start_row - 1:end_row, start_col_num - 1:end_col_num] = grid
-
-                    # ✅ Only update changed grid range (no Unnamed)
-                    conn.update(
-                        worksheet=sheet_warehouse,
-                        data=name.iloc[start_row - 1:end_row, start_col_num - 1:end_col_num],
-                    )
-
-                st.success("✅ Berhasil menyimpan perubahan & format Kolom L otomatis!")
+                st.success("✅ Data di WarehouseAlldata berhasil diperbarui & format Kolom L otomatis!")
 
 # status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
 # status_list = ["-", "Hadir", "Ijin", "Sakit"]
@@ -381,6 +344,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
