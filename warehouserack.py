@@ -152,19 +152,24 @@ if selected_name != "-":
 st.markdown("---")
 st.header("🔍 Cari Berdasarkan Rak & Kolom")
 
-# Dropdown for Rak (Kolom K)
+# --- Dropdown for Rak (Kolom K) ---
 rak_list = name.iloc[:, 10].dropna().astype(str).unique().tolist()
 rak_list.insert(0, "-")
 selected_rak = st.selectbox("Pilih Rak (Kolom K):", rak_list)
 
-# Dropdown for Kolom (Kolom L)
-kolom_list = name.iloc[:, 11].dropna().astype(str).unique().tolist()
-kolom_list.insert(0, "-")
+# --- Filter Kolom list based on selected Rak ---
+if selected_rak != "-":
+    filtered_for_rak = name[name.iloc[:, 10] == selected_rak]
+    kolom_list = filtered_for_rak.iloc[:, 11].dropna().astype(str).unique().tolist()
+    kolom_list.insert(0, "-")
+else:
+    kolom_list = ["-"]
+
 selected_kolom = st.selectbox("Pilih Kolom (Kolom L):", kolom_list)
 
+# --- Show result button ---
 if st.button("🔎 Tampilkan Data"):
     if selected_rak != "-" and selected_kolom != "-":
-        # Filter matching rows
         result = name[(name.iloc[:, 10] == selected_rak) & (name.iloc[:, 11] == selected_kolom)]
 
         if not result.empty:
@@ -385,6 +390,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
