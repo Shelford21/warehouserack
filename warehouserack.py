@@ -117,9 +117,9 @@ if selected_name != "-":
             current_k = str(name.iloc[idx, 10]) if len(name.columns) > 10 else ""
             current_l = str(name.iloc[idx, 11]) if len(name.columns) > 11 else ""
 
-            st.write("### Edit Kolom K dan L")
-            new_k = st.text_input("Kolom K:", current_k)
-            new_l = st.text_input("Kolom L:", current_l)
+            st.write("### Edit rak dan Kolom ")
+            new_k = st.text_input("rak:", current_k)
+            new_l = st.text_input("Kolom:", current_l)
 
             # --- Clean Kolom L automatically ---
             if new_l.strip():
@@ -344,6 +344,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
