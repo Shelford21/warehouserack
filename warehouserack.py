@@ -88,6 +88,10 @@ rack_ranges = {
     "R32": "W18:Y20",       # 3x5
     "R31": "W22:Y24"
 }
+if st.button("🧹 Clear Cache"):
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    st.success("✅ Cache berhasil dibersihkan!")
 
 # --- Dropdown: Column B ---
 name_list = name.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
@@ -377,6 +381,7 @@ if admin_password == ADMIN_PASSWORD:
 else:
     if admin_password != "":
         st.error("❌ Incorrect password.")
+
 
 
 
