@@ -12,12 +12,17 @@ def load_css():
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 load_css()
-
+if st.button("🔄 Refresh Data"):
+    st.cache_data.clear()
+    st.rerun()
 #url = "https://docs.google.com/spreadsheets/d/1dK2tKeeRGAiVc6p0guapTITane-NckvuAFB3rrHu3k8/edit?usp=sharing"
 url = "WarehouseAlldata"
 urlp = "percobaan"
 
-
+@st.cache_data(ttl=30)
+def load_sheet():
+    """Read Google Sheet (cached for 60 seconds)."""
+    return conn.read(worksheet=url)
 #urll = "https://docs.google.com/spreadsheets/d/1dK2tKeeRGAiVc6p0guapTITane-NckvuAFB3rrHu3k8/edit?usp=sharing"
 # sheet_id = "1dK2tKeeRGAiVc6p0guapTITane-NckvuAFB3rrHu3k8"
 # excel_link = f"https://docs.google.com/spreadsheets/d/1dK2tKeeRGAiVc6p0guapTITane-NckvuAFB3rrHu3k8/export?format=xlsx"
@@ -32,7 +37,7 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 #data = conn.read(spreadsheet=url, worksheet="1750077145")
 #data = conn.read(worksheet=url)
 
-name= conn.read(worksheet=url)
+name= load_sheet()
 
 #selected_date = st.8number_input("Tanggal:", min_value=1, max_value=30, step=1)
 
@@ -385,6 +390,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
