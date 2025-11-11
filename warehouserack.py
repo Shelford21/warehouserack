@@ -113,7 +113,7 @@ if selected_name != "-":
         # okDropdown 3: Kolom D (Material)
         material_list = kode_filtered.iloc[:, 3].dropna().astype(str).unique().tolist()
         material_list.insert(0, "-")
-        selected_material = st.selectbox("Pilih Material (Kolom D):", material_list)
+        selected_material = st.selectbox("Pilih Item:", material_list)
 
         if selected_material != "-":
             row_index = kode_filtered.index[kode_filtered.iloc[:, 3] == selected_material].tolist()
@@ -384,6 +384,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
