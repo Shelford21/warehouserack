@@ -151,7 +151,7 @@ st.header("🔍 Cari Berdasarkan Rak & Kolom")
 # --- Dropdown for Rak (Kolom K) ---
 rak_list = name.iloc[:, 10].dropna().astype(str).unique().tolist()
 rak_list.insert(0, "-")
-selected_rak = st.selectbox("Pilih Rak (Kolom K):", rak_list)
+selected_rak = st.selectbox("Pilih Rak (Kolom K):", rak_list, key="rak_select")
 
 # --- Filter Kolom list based on selected Rak ---
 if selected_rak != "-":
@@ -161,7 +161,7 @@ if selected_rak != "-":
 else:
     kolom_list = ["-"]
 
-selected_kolom = st.selectbox("Pilih Kolom (Kolom L):", kolom_list)
+selected_kolom = st.selectbox("Pilih Kolom (Kolom L):", kolom_list, key="kolom_select")
 
 # --- Show result button ---
 if st.button("🔎 Tampilkan Data"):
@@ -169,63 +169,83 @@ if st.button("🔎 Tampilkan Data"):
         result = name[(name.iloc[:, 10] == selected_rak) & (name.iloc[:, 11] == selected_kolom)]
 
         if not result.empty:
+            st.session_state["result"] = result
+            st.session_state["selected_rak"] = selected_rak
+            st.session_state["selected_kolom"] = selected_kolom
             st.success(f"📍 Ditemukan {len(result)} data di Rak {selected_rak}, Kolom {selected_kolom}")
-
-            # Show table for reference
-            st.dataframe(result.iloc[:, [1, 2, 3, 10, 11]].rename(
-                columns={
-                    name.columns[1]: "PO",
-                    name.columns[2]: "Kode",
-                    name.columns[3]: "Material",
-                    name.columns[10]: "Rak",
-                    name.columns[11]: "Kolom",
-                }
-            ))
-
-            # If multiple rows found, let user pick which to edit
-            if len(result) > 1:
-                idx_list = result.index.tolist()
-                chosen_idx = st.selectbox("Pilih baris untuk diedit:", idx_list)
-            else:
-                chosen_idx = result.index.tolist()[0]
-
-            # Get current values
-            current_po = str(name.iloc[chosen_idx, 1])
-            current_kode = str(name.iloc[chosen_idx, 2])
-            current_material = str(name.iloc[chosen_idx, 3])
-            current_rak = str(name.iloc[chosen_idx, 10])
-            current_kolom = str(name.iloc[chosen_idx, 11])
-
-            st.write("### ✏️ Edit Data di Rak & Kolom Ini")
-            new_po = st.text_input("PO:", current_po)
-            new_kode = st.text_input("Kode:", current_kode)
-            new_material = st.text_input("Material:", current_material)
-            new_rak = st.text_input("Rak:", current_rak)
-            new_kolom = st.text_input("Kolom:", current_kolom)
-
-            # Clean Kolom input automatically
-            if new_kolom.strip():
-                cleaned = re.sub(r"[-\s;]+", ",", new_kolom)
-                cleaned = cleaned.replace(",,", ",").strip(",")
-                parts = [p.strip() for p in cleaned.split(",") if p.strip()]
-                new_kolom = ",".join([f'"{p}"' for p in parts])
-
-            # Save button
-            if st.button("💾 Simpan Perubahan (Rak & Kolom Ini)"):
-                name.iat[chosen_idx, 1] = new_po
-                name.iat[chosen_idx, 2] = new_kode
-                name.iat[chosen_idx, 3] = new_material
-                name.iat[chosen_idx, 10] = new_rak
-                name.iat[chosen_idx, 11] = new_kolom
-
-                conn.update(worksheet=sheet_warehouse, data=name)
-
-                st.success("✅ Data berhasil diperbarui untuk rak & kolom yang dipilih!")
-
         else:
             st.warning("⚠️ Tidak ada data untuk Rak & Kolom tersebut.")
+            st.session_state.pop("result", None)
+
+# --- If result already stored ---
+if "result" in st.session_state:
+    result = st.session_state["result"]
+
+    # Show table
+    st.dataframe(result.iloc[:, [1, 2, 3, 10, 11]].rename(
+        columns={
+            name.columns[1]: "PO",
+            name.columns[2]: "Kode",
+            name.columns[3]: "Material",
+            name.columns[10]: "Rak",
+            name.columns[11]: "Kolom",
+        }
+    ))
+
+    # Choose which row to edit if multiple
+    if len(result) > 1:
+        idx_list = result.index.tolist()
+        chosen_idx = st.selectbox("Pilih baris untuk diedit:", idx_list, key="edit_idx")
     else:
-        st.info("Pilih Rak dan Kolom terlebih dahulu.")
+        chosen_idx = result.index.tolist()[0]
+
+    st.session_state["chosen_idx"] = chosen_idx
+
+    # Load current values once
+    if "edit_fields" not in st.session_state:
+        idx = chosen_idx
+        st.session_state["edit_fields"] = {
+            "po": str(name.iloc[idx, 1]),
+            "kode": str(name.iloc[idx, 2]),
+            "material": str(name.iloc[idx, 3]),
+            "rak": str(name.iloc[idx, 10]),
+            "kolom": str(name.iloc[idx, 11]),
+        }
+
+    edit = st.session_state["edit_fields"]
+
+    st.write("### ✏️ Edit Data di Rak & Kolom Ini")
+    edit["po"] = st.text_input("PO:", edit["po"], key="po_edit")
+    edit["kode"] = st.text_input("Kode:", edit["kode"], key="kode_edit")
+    edit["material"] = st.text_input("Material:", edit["material"], key="mat_edit")
+    edit["rak"] = st.text_input("Rak:", edit["rak"], key="rak_edit")
+    edit["kolom"] = st.text_input("Kolom:", edit["kolom"], key="kol_edit")
+
+    # --- Save button ---
+    if st.button("💾 Simpan Perubahan (Rak & Kolom Ini)"):
+        # Clean Kolom input automatically
+        new_kolom = edit["kolom"].strip()
+        if new_kolom:
+            cleaned = re.sub(r"[-\s;]+", ",", new_kolom)
+            cleaned = cleaned.replace(",,", ",").strip(",")
+            parts = [p.strip() for p in cleaned.split(",") if p.strip()]
+            new_kolom = ",".join([f'"{p}"' for p in parts])
+            edit["kolom"] = new_kolom
+
+        idx = st.session_state["chosen_idx"]
+        name.iat[idx, 1] = edit["po"]
+        name.iat[idx, 2] = edit["kode"]
+        name.iat[idx, 3] = edit["material"]
+        name.iat[idx, 10] = edit["rak"]
+        name.iat[idx, 11] = edit["kolom"]
+
+        conn.update(worksheet=sheet_warehouse, data=name)
+
+        st.success("✅ Data berhasil diperbarui!")
+
+        # Reset edit form
+        st.session_state.pop("edit_fields", None)
+
 
 
 # status_map = {"Hadir": "H", "Ijin": "I", "Sakit": "S"}
@@ -430,6 +450,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
