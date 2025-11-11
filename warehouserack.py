@@ -159,18 +159,6 @@ if selected_rak != "-":
 else:
     kolom_list = ["-"]
 
-# -Dropdown for qtyroll (Kolom K) 
-qtyroll_list = name.iloc[:, 9].dropna().astype(str).unique().tolist()
-qtyroll_list.insert(0, "-")
-selected_qtyroll = st.selectbox("Pilih qtyroll (Kolom K):", qtyroll_list)
-
-# okFilter Kolom list based on selected qtyroll 
-if selected_qtyroll != "-":
-    filtered_for_qtyroll = name[name.iloc[:, 9] == selected_qtyroll]
-    kolom_list = filtered_for_qtyroll.iloc[:, 10].dropna().astype(str).unique().tolist()
-    kolom_list.insert(0, "-")
-else:
-    kolom_list = ["-"]
 
 selected_kolom = st.selectbox("Pilih Kolom (Kolom L):", kolom_list)
 
@@ -397,6 +385,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
