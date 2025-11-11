@@ -173,7 +173,7 @@ if st.button("🔎 Tampilkan Data"):
                 columns={
                     name.columns[1]: "PO",
                     name.columns[2]: "Kode",
-                    name.columns[3]: "Material",
+                    name.columns[3]: "Item",
                     name.columns[10]: "Rak",
                     name.columns[11]: "Kolom",
                 }
@@ -385,6 +385,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
