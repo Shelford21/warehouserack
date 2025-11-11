@@ -12,9 +12,7 @@ def load_css():
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 load_css()
-if st.button("🔄 Refresh Data"):
-    st.cache_data.clear()
-    st.rerun()
+
 #url = "https://docs.google.com/spreadsheets/d/1dK2tKeeRGAiVc6p0guapTITane-NckvuAFB3rrHu3k8/edit?usp=sharing"
 url = "WarehouseAlldata"
 urlp = "percobaan"
@@ -93,10 +91,9 @@ sheet_layout = "layoutwarehouse2"
 #     "R32": "W18:Y20",       # 3x5
 #     "R31": "W22:Y24"
 # }
-if st.button("🧹 Clear Cache"):
+if st.button("🔄 Refresh Data"):
     st.cache_data.clear()
-    st.cache_resource.clear()
-    st.success("✅ Cache berhasil dibersihkan!")
+    st.rerun()
 
 st.header("✏️ Edit Berdasarkan PO, Kode, dan Material")
 
@@ -390,6 +387,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
