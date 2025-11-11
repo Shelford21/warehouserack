@@ -45,7 +45,7 @@ CSV_FILE = "submissions.csv"
 # Set your admin password here
 ADMIN_PASSWORD = "mumi99"
 
-st.set_page_config(page_title="Mumi Sukamulya 2",
+st.set_page_config(page_title="Warehouse",
                    page_icon="✨",
                    layout="wide")
 
@@ -54,7 +54,7 @@ st.markdown(
         <div class="transparent-container">
             <h1>✨ Warehouse</h1>
             <h4>
-            <br><br> 💡
+            <br>💡 QTM 2025 💡 
     </h4>
     
         """,
@@ -79,23 +79,20 @@ selected_date = now.day
 sheet_warehouse = "WarehouseAlldata"
 sheet_layout = "layoutwarehouse2"
 
-rack_ranges = {
-    "U37": "U2:U4",         # vertical 3 cells
-    "T36": "W2:Y4",         # 3x3
-    "T35": "W6:Y8",
-    "S34": "W10:Y12",
-    "S33": "W14:Y16",
-    "R32": "W18:Y20",       # 3x5
-    "R31": "W22:Y24"
-}
+# rack_ranges = {
+#     "U37": "U2:U4",         # vertical 3 cells
+#     "T36": "W2:Y4",         # 3x3
+#     "T35": "W6:Y8",
+#     "S34": "W10:Y12",
+#     "S33": "W14:Y16",
+#     "R32": "W18:Y20",       # 3x5
+#     "R31": "W22:Y24"
+# }
 if st.button("🧹 Clear Cache"):
     st.cache_data.clear()
     st.cache_resource.clear()
     st.success("✅ Cache berhasil dibersihkan!")
 
-# ============================================
-# 🔹 SECTION 1 — Edit Rak & Kolom (existing)
-# ============================================
 st.header("✏️ Edit Berdasarkan PO, Kode, dan Material")
 
 name_list = name.iloc[0:2700, 1].dropna().astype(str).unique().tolist()
@@ -105,7 +102,7 @@ selected_name = st.selectbox("Pilih PO:", name_list)
 if selected_name != "-":
     filtered_rows = name[name.iloc[:, 1] == selected_name]
 
-    # Dropdown 2: Kolom C (Kode)
+    # okDropdown 2: Kolom C (Kode)
     option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
     selected_option = st.selectbox("Pilih Kode:", option_list)
@@ -113,7 +110,7 @@ if selected_name != "-":
     if selected_option != "-":
         kode_filtered = filtered_rows[filtered_rows.iloc[:, 2] == selected_option]
 
-        # Dropdown 3: Kolom D (Material)
+        # okDropdown 3: Kolom D (Material)
         material_list = kode_filtered.iloc[:, 3].dropna().astype(str).unique().tolist()
         material_list.insert(0, "-")
         selected_material = st.selectbox("Pilih Material (Kolom D):", material_list)
@@ -124,7 +121,7 @@ if selected_name != "-":
             if row_index:
                 idx = row_index[0]
 
-                # --- Show current K and L values ---
+                # okShow current K and L values 
                 current_k = str(name.iloc[idx, 10]) if len(name.columns) > 10 else ""
                 current_l = str(name.iloc[idx, 11]) if len(name.columns) > 11 else ""
 
@@ -132,32 +129,29 @@ if selected_name != "-":
                 new_k = st.text_input("Rak:", current_k)
                 new_l = st.text_input("Kolom:", current_l)
 
-                # --- Clean Kolom L automatically ---
+                # okClean Kolom L automatically
                 if new_l.strip():
                     cleaned = re.sub(r"[-\s;]+", ",", new_l)
                     cleaned = cleaned.replace(",,", ",").strip(",")
                     parts = [p.strip() for p in cleaned.split(",") if p.strip()]
                     new_l = ",".join([f'"{p}"' for p in parts])
 
-                # --- Save button ---
+                # okSave button 
                 if st.button("💾 Simpan Perubahan"):
                     name.iat[idx, 10] = new_k
                     name.iat[idx, 11] = new_l
                     conn.update(worksheet=sheet_warehouse, data=name)
                     st.success("✅ Data di WarehouseAlldata berhasil diperbarui!")
 
-# ============================================
-# 🔹 SECTION 2 — Cari Berdasarkan Rak & Kolom
-# ============================================
 st.markdown("---")
 st.header("🔍 Cari Berdasarkan Rak & Kolom")
 
-# --- Dropdown for Rak (Kolom K) ---
+# -Dropdown for Rak (Kolom K) 
 rak_list = name.iloc[:, 10].dropna().astype(str).unique().tolist()
 rak_list.insert(0, "-")
 selected_rak = st.selectbox("Pilih Rak (Kolom K):", rak_list)
 
-# --- Filter Kolom list based on selected Rak ---
+# okFilter Kolom list based on selected Rak 
 if selected_rak != "-":
     filtered_for_rak = name[name.iloc[:, 10] == selected_rak]
     kolom_list = filtered_for_rak.iloc[:, 11].dropna().astype(str).unique().tolist()
@@ -167,7 +161,7 @@ else:
 
 selected_kolom = st.selectbox("Pilih Kolom (Kolom L):", kolom_list)
 
-# --- Show result button ---
+# ok Show result button 
 if st.button("🔎 Tampilkan Data"):
     if selected_rak != "-" and selected_kolom != "-":
         result = name[(name.iloc[:, 10] == selected_rak) & (name.iloc[:, 11] == selected_kolom)]
@@ -390,6 +384,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
