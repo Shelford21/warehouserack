@@ -182,13 +182,13 @@ if "result" in st.session_state:
     result = st.session_state["result"]
 
     # Show table
-    st.dataframe(result.iloc[:, [1, 2, 3, 10, 11]].rename(
+    st.dataframe(result.iloc[:, [7, 5, 6, 16, 17]].rename(
         columns={
-            name.columns[1]: "PO",
-            name.columns[2]: "Kode",
-            name.columns[3]: "Material",
-            name.columns[10]: "Rak",
-            name.columns[11]: "Kolom",
+            name.columns[7]: "PO",
+            name.columns[5]: "Kode",
+            name.columns[6]: "Material",
+            name.columns[16]: "Rak",
+            name.columns[17]: "Kolom",
         }
     ))
 
@@ -450,6 +450,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
