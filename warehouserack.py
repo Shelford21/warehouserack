@@ -205,9 +205,9 @@ if "result" in st.session_state:
     if "edit_fields" not in st.session_state:
         idx = chosen_idx
         st.session_state["edit_fields"] = {
-            "po": str(name.iloc[idx, 1]),
-            "kode": str(name.iloc[idx, 2]),
-            "material": str(name.iloc[idx, 3]),
+            "po": str(name.iloc[idx, 7]),
+            "kode": str(name.iloc[idx, 5]),
+            "material": str(name.iloc[idx, 6]),
             "rak": str(name.iloc[idx, 16]),
             "kolom": str(name.iloc[idx, 17]),
         }
@@ -233,9 +233,9 @@ if "result" in st.session_state:
             edit["kolom"] = new_kolom
 
         idx = st.session_state["chosen_idx"]
-        name.iat[idx, 1] = edit["po"]
-        name.iat[idx, 2] = edit["kode"]
-        name.iat[idx, 3] = edit["material"]
+        name.iat[idx, 7] = edit["po"]
+        name.iat[idx, 5] = edit["kode"]
+        name.iat[idx, 6] = edit["material"]
         name.iat[idx, 16] = edit["rak"]
         name.iat[idx, 17] = edit["kolom"]
 
@@ -450,6 +450,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
