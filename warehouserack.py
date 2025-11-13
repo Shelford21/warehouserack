@@ -105,7 +105,7 @@ if selected_name != "-":
     filtered_rows = name[name.iloc[:, 1] == selected_name]
 
     # okDropdown 2: Kolom C (Kode)
-    option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
+    option_list = filtered_rows.iloc[:, 5].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
     selected_option = st.selectbox("Pilih Kode:", option_list)
 
@@ -450,6 +450,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
