@@ -97,7 +97,7 @@ if st.button("🔄 Refresh Data"):
 
 st.header("✏️ Edit Berdasarkan PO, Kode, dan Material")
 
-name_list = name.iloc[0:30000, 8].dropna().astype(str).unique().tolist()
+name_list = name.iloc[0:30000, 1].dropna().astype(str).unique().tolist()
 name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih PO:", name_list)
 
