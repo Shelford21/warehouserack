@@ -165,7 +165,8 @@ if selected_name != "-":
                         name.iat[idx, 16] = new_k
                         name.iat[idx, 17] = new_l
                         conn.update(worksheet=sheet_warehouse, data=name)
-                        st.
+                        st.success("✅ Data di WarehouseAlldata berhasil diperbarui!")
+
 
 
 st.markdown("---")
