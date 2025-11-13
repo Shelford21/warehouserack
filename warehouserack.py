@@ -179,7 +179,7 @@ if st.button("🔎 Tampilkan Data"):
             del st.session_state[key]
 
     if selected_rak != "-" and selected_kolom != "-":
-        result = name[(name.iloc[:, 15] == selected_rak) & (name.iloc[:, 16] == selected_kolom)]
+        result = name[(name.iloc[:, 16] == selected_rak) & (name.iloc[:, 17] == selected_kolom)]
 
         if not result.empty:
             st.session_state["result"] = result
@@ -467,6 +467,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
