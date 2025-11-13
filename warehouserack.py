@@ -118,12 +118,12 @@ if selected_name != "-":
         selected_material = st.selectbox("Pilih Item:", material_list)
 
         if selected_option != "-":
-        item_filtered = filtered_rows[filtered_rows.iloc[:, 5] == selected_material]
-
-        # okDropdownitem lee
-        item_list = item_filtered.iloc[:, 4].dropna().astype(str).unique().tolist()
-        item_list.insert(0, "-")
-        selected_item = st.selectbox("Pilih Item:", item_list)
+            item_filtered = filtered_rows[filtered_rows.iloc[:, 5] == selected_material]
+    
+            # okDropdownitem lee
+            item_list = item_filtered.iloc[:, 4].dropna().astype(str).unique().tolist()
+            item_list.insert(0, "-")
+            selected_item = st.selectbox("Pilih Item:", item_list)
         
             if selected_item != "-":
                 row_index = kode_filtered.index[kode_filtered.iloc[:, 4] == selected_item].tolist()
@@ -458,6 +458,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
