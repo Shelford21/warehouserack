@@ -173,6 +173,7 @@ selected_kolom = st.selectbox("Pilih Kolom (Kolom L):", kolom_list, key="kolom_s
 
 # --- Show result button ---
 if st.button("🔎 Tampilkan Data"):
+    st.cache_data.clear()
     if selected_rak != "-" and selected_kolom != "-":
         result = name[(name.iloc[:, 16] == selected_rak) & (name.iloc[:, 17] == selected_kolom)]
 
@@ -462,6 +463,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
