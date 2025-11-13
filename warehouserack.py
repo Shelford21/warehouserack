@@ -97,14 +97,15 @@ if st.button("🔄 Refresh Data"):
 
 st.header("✏️ Edit Berdasarkan PO, Kode, dan Material")
 
-name_list = name.iloc[0:30000, 7].dropna().astype(str).unique().tolist()
+# --- Dropdown 1: PO ---
+name_list = name.iloc[:, 7].dropna().astype(str).unique().tolist()
 name_list.insert(0, "-")
 selected_name = st.selectbox("Pilih PO:", name_list)
 
 if selected_name != "-":
     filtered_rows = name[name.iloc[:, 7] == selected_name]
 
-    # okDropdown 2: Kolom C (Kode)
+    # --- Dropdown 2: Kode ---
     option_list = filtered_rows.iloc[:, 5].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
     selected_option = st.selectbox("Pilih Kode:", option_list)
@@ -112,46 +113,60 @@ if selected_name != "-":
     if selected_option != "-":
         kode_filtered = filtered_rows[filtered_rows.iloc[:, 5] == selected_option]
 
-        # okDropdown 3: Kolom D (Material)
+        # --- Dropdown 3: Material ---
         material_list = kode_filtered.iloc[:, 6].dropna().astype(str).unique().tolist()
         material_list.insert(0, "-")
         selected_material = st.selectbox("Pilih Material:", material_list)
 
-        if selected_option != "-":
-            item_filtered = filtered_rows[filtered_rows.iloc[:, 6] == selected_material]
-    
-            # okDropdownitem lee
+        if selected_material != "-":
+            item_filtered = kode_filtered[kode_filtered.iloc[:, 6] == selected_material]
+
+            # --- Dropdown 4: Item ---
             item_list = item_filtered.iloc[:, 4].dropna().astype(str).unique().tolist()
             item_list.insert(0, "-")
             selected_item = st.selectbox("Pilih Item:", item_list)
-        
+
             if selected_item != "-":
-                row_index = kode_filtered.index[kode_filtered.iloc[:, 4] == selected_item].tolist()
-    
+                # --- Get the target row ---
+                row_index = item_filtered.index[item_filtered.iloc[:, 4] == selected_item].tolist()
+
                 if row_index:
                     idx = row_index[0]
-    
-                    # okShow current K and L values 
-                    current_k = str(name.iloc[idx, 16]) if len(name.columns) > 10 else ""
-                    current_l = str(name.iloc[idx, 17]) if len(name.columns) > 11 else ""
-    
+
+                    # --- Get current Rak & Kolom values ---
+                    current_k = str(name.iloc[idx, 16]) if len(name.columns) > 16 else ""
+                    current_l = str(name.iloc[idx, 17]) if len(name.columns) > 17 else ""
+
                     st.write("### Edit Rak dan Kolom")
-                    new_k = st.text_input("Rak:", current_k)
-                    new_l = st.text_input("Kolom:", current_l)
-    
-                    # okClean Kolom L automatically
+
+                    # --- Dropdown for existing Rak values ---
+                    rak_list = name.iloc[:, 16].dropna().astype(str).unique().tolist()
+                    rak_list.insert(0, "-")
+                    selected_rak_dropdown = st.selectbox("Pilih Rak (opsional):", rak_list, index=rak_list.index(current_k) if current_k in rak_list else 0)
+
+                    # --- Dropdown for existing Kolom values ---
+                    kolom_list = name.iloc[:, 17].dropna().astype(str).unique().tolist()
+                    kolom_list.insert(0, "-")
+                    selected_kolom_dropdown = st.selectbox("Pilih Kolom (opsional):", kolom_list, index=kolom_list.index(current_l) if current_l in kolom_list else 0)
+
+                    # --- Manual edit fields ---
+                    new_k = st.text_input("Atau tulis Rak baru:", selected_rak_dropdown if selected_rak_dropdown != "-" else current_k)
+                    new_l = st.text_input("Atau tulis Kolom baru:", selected_kolom_dropdown if selected_kolom_dropdown != "-" else current_l)
+
+                    # --- Clean Kolom automatically ---
                     if new_l.strip():
                         cleaned = re.sub(r"[-\s;]+", ",", new_l)
                         cleaned = cleaned.replace(",,", ",").strip(",")
                         parts = [p.strip() for p in cleaned.split(",") if p.strip()]
                         new_l = ",".join([f'"{p}"' for p in parts])
-    
-                    # okSave button 
+
+                    # --- Save button ---
                     if st.button("💾 Simpan Perubahan"):
                         name.iat[idx, 16] = new_k
                         name.iat[idx, 17] = new_l
                         conn.update(worksheet=sheet_warehouse, data=name)
-                        st.success("✅ Data di WarehouseAlldata berhasil diperbarui!")
+                        st.
+
 
 st.markdown("---")
 st.header("🔍 Cari Berdasarkan Rak & Kolom")
@@ -483,6 +498,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
