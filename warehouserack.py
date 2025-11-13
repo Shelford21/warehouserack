@@ -105,12 +105,12 @@ if selected_name != "-":
     filtered_rows = name[name.iloc[:, 1] == selected_name]
 
     # okDropdown 2: Kolom C (Kode)
-    option_list = filtered_rows.iloc[:, 5].dropna().astype(str).unique().tolist()
+    option_list = filtered_rows.iloc[:, 2].dropna().astype(str).unique().tolist()
     option_list.insert(0, "-")
     selected_option = st.selectbox("Pilih Kode:", option_list)
 
     if selected_option != "-":
-        kode_filtered = filtered_rows[filtered_rows.iloc[:, 2] == selected_option]
+        kode_filtered = filtered_rows[filtered_rows.iloc[:, 5] == selected_option]
 
         # okDropdown 3: Kolom D (Material)
         material_list = kode_filtered.iloc[:, 3].dropna().astype(str).unique().tolist()
@@ -118,7 +118,7 @@ if selected_name != "-":
         selected_material = st.selectbox("Pilih Item:", material_list)
 
         if selected_material != "-":
-            row_index = kode_filtered.index[kode_filtered.iloc[:, 3] == selected_material].tolist()
+            row_index = kode_filtered.index[kode_filtered.iloc[:, 6] == selected_material].tolist()
 
             if row_index:
                 idx = row_index[0]
@@ -450,6 +450,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
