@@ -207,7 +207,6 @@ if st.button("🔎 Tampilkan Data"):
             st.warning("⚠️ Tidak ada data untuk Rak & Kolom tersebut.")
 
 
-# --- If result already stored ---
 if "result" in st.session_state:
     result = st.session_state["result"]
 
@@ -226,57 +225,60 @@ if "result" in st.session_state:
     # Choose which row to edit if multiple
     if len(result) > 1:
         idx_list = result.index.tolist()
-        # create selectbox with a key so selected index stays in session_state
-        st.selectbox("Pilih baris untuk diedit:", idx_list, key="edit_idx")
-        chosen_idx = st.session_state["edit_idx"]
+        chosen_idx = st.selectbox("Pilih baris untuk diedit:", idx_list, key="edit_idx")
     else:
         chosen_idx = result.index.tolist()[0]
-        # ensure session_state has edit_idx for uniform handling
-        st.session_state["edit_idx"] = chosen_idx
 
-    # If the selected row changed (or first time), populate the edit widget keys
-    if st.session_state.get("current_row") != chosen_idx:
-        st.session_state["current_row"] = chosen_idx
-        st.session_state["po_edit"] = str(name.iloc[chosen_idx, 7])
-        st.session_state["kode_edit"] = str(name.iloc[chosen_idx, 5])
-        st.session_state["item_edit"] = str(name.iloc[chosen_idx, 4])
-        st.session_state["mat_edit"] = str(name.iloc[chosen_idx, 6])
-        st.session_state["rak_edit"] = str(name.iloc[chosen_idx, 16])
-        st.session_state["kol_edit"] = str(name.iloc[chosen_idx, 17])
+    st.session_state["chosen_idx"] = chosen_idx
 
-    # now show inputs bound to those session_state keys (they will keep their values)
+    # Load current values once
+    if "edit_fields" not in st.session_state:
+        idx = chosen_idx
+        st.session_state["edit_fields"] = {
+            "po": str(name.iloc[idx, 7]),
+            "kode": str(name.iloc[idx, 5]),
+            "item": str(name.iloc[idx, 4]),
+            "material": str(name.iloc[idx, 6]),
+            "rak": str(name.iloc[idx, 16]),
+            "kolom": str(name.iloc[idx, 17]),
+        }
+
+    edit = st.session_state["edit_fields"]
+
+    # ✅ Dynamic unique key based on chosen index
+    suffix = f"_{chosen_idx}"
+
     st.write("### ✏️ Edit Data di Rak & Kolom Ini")
-    new_po = st.text_input("PO:", key="po_edit")
-    new_kode = st.text_input("Kode:", key="kode_edit")
-    new_item = st.text_input("item:", key="item_edit")
-    new_material = st.text_input("Material:", key="mat_edit")
-    new_rak = st.text_input("Rak:", key="rak_edit")
-    new_kolom = st.text_input("Kolom:", key="kol_edit")
+    edit["po"] = st.text_input("PO:", edit["po"], key=f"po_edit{suffix}")
+    edit["kode"] = st.text_input("Kode:", edit["kode"], key=f"kode_edit{suffix}")
+    edit["item"] = st.text_input("Item:", edit["item"], key=f"item_edit{suffix}")
+    edit["material"] = st.text_input("Material:", edit["material"], key=f"mat_edit{suffix}")
+    edit["rak"] = st.text_input("Rak:", edit["rak"], key=f"rak_edit{suffix}")
+    edit["kolom"] = st.text_input("Kolom:", edit["kolom"], key=f"kol_edit{suffix}")
 
-    # --- Save button ---
     if st.button("💾 Simpan Perubahan (Rak & Kolom Ini)"):
-        # Clean Kolom input automatically
-        nk = new_kolom.strip()
-        if nk:
-            cleaned = re.sub(r"[-\s;]+", ",", nk)
+        new_kolom = edit["kolom"].strip()
+        if new_kolom:
+            cleaned = re.sub(r"[-\s;]+", ",", new_kolom)
             cleaned = cleaned.replace(",,", ",").strip(",")
             parts = [p.strip() for p in cleaned.split(",") if p.strip()]
-            nk = ",".join([f'"{p}"' for p in parts])
-        else:
-            nk = ""
+            new_kolom = ",".join([f'"{p}"' for p in parts])
+            edit["kolom"] = new_kolom
 
-        idx = st.session_state["current_row"]
-        # write to DataFrame
-        name.iat[idx, 7] = new_po
-        name.iat[idx, 5] = new_kode
-        name.iat[idx, 4] = new_item
-        name.iat[idx, 6] = new_material
-        name.iat[idx, 16] = new_rak
-        name.iat[idx, 17] = nk
+        idx = st.session_state["chosen_idx"]
+        name.iat[idx, 7] = edit["po"]
+        name.iat[idx, 5] = edit["kode"]
+        name.iat[idx, 4] = edit["item"]
+        name.iat[idx, 6] = edit["material"]
+        name.iat[idx, 16] = edit["rak"]
+        name.iat[idx, 17] = edit["kolom"]
 
-        # push update
         conn.update(worksheet=sheet_warehouse, data=name)
         st.success("✅ Data berhasil diperbarui!")
+
+        # Reset edit form after save
+        st.session_state.pop("edit_fields", None)
+
 
         # refresh stored result to reflect saved changes (try to keep same filter if available)
         sel_rak = st.session_state.get("selected_rak")
@@ -500,6 +502,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
