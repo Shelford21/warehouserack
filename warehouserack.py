@@ -173,9 +173,13 @@ selected_kolom = st.selectbox("Pilih Kolom (Kolom L):", kolom_list, key="kolom_s
 
 # --- Show result button ---
 if st.button("🔎 Tampilkan Data"):
-    st.cache_data.clear()
+    # 🧹 Clear old editing state before showing new data
+    for key in ["result", "chosen_idx", "edit_fields"]:
+        if key in st.session_state:
+            del st.session_state[key]
+
     if selected_rak != "-" and selected_kolom != "-":
-        result = name[(name.iloc[:, 16] == selected_rak) & (name.iloc[:, 17] == selected_kolom)]
+        result = name[(name.iloc[:, 10] == selected_rak) & (name.iloc[:, 11] == selected_kolom)]
 
         if not result.empty:
             st.session_state["result"] = result
@@ -184,7 +188,7 @@ if st.button("🔎 Tampilkan Data"):
             st.success(f"📍 Ditemukan {len(result)} data di Rak {selected_rak}, Kolom {selected_kolom}")
         else:
             st.warning("⚠️ Tidak ada data untuk Rak & Kolom tersebut.")
-            st.session_state.pop("result", None)
+
 
 # --- If result already stored ---
 if "result" in st.session_state:
@@ -463,6 +467,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
