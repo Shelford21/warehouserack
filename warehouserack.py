@@ -117,33 +117,41 @@ if selected_name != "-":
         material_list.insert(0, "-")
         selected_material = st.selectbox("Pilih Item:", material_list)
 
-        if selected_material != "-":
-            row_index = kode_filtered.index[kode_filtered.iloc[:, 4] == selected_material].tolist()
+        if selected_option != "-":
+        item_filtered = filtered_rows[filtered_rows.iloc[:, 5] == selected_material]
 
-            if row_index:
-                idx = row_index[0]
-
-                # okShow current K and L values 
-                current_k = str(name.iloc[idx, 16]) if len(name.columns) > 10 else ""
-                current_l = str(name.iloc[idx, 17]) if len(name.columns) > 11 else ""
-
-                st.write("### Edit Rak dan Kolom")
-                new_k = st.text_input("Rak:", current_k)
-                new_l = st.text_input("Kolom:", current_l)
-
-                # okClean Kolom L automatically
-                if new_l.strip():
-                    cleaned = re.sub(r"[-\s;]+", ",", new_l)
-                    cleaned = cleaned.replace(",,", ",").strip(",")
-                    parts = [p.strip() for p in cleaned.split(",") if p.strip()]
-                    new_l = ",".join([f'"{p}"' for p in parts])
-
-                # okSave button 
-                if st.button("💾 Simpan Perubahan"):
-                    name.iat[idx, 16] = new_k
-                    name.iat[idx, 17] = new_l
-                    conn.update(worksheet=sheet_warehouse, data=name)
-                    st.success("✅ Data di WarehouseAlldata berhasil diperbarui!")
+        # okDropdownitem lee
+        item_list = item_filtered.iloc[:, 4].dropna().astype(str).unique().tolist()
+        item_list.insert(0, "-")
+        selected_item = st.selectbox("Pilih Item:", item_list)
+        
+            if selected_item != "-":
+                row_index = kode_filtered.index[kode_filtered.iloc[:, 4] == selected_item].tolist()
+    
+                if row_index:
+                    idx = row_index[0]
+    
+                    # okShow current K and L values 
+                    current_k = str(name.iloc[idx, 16]) if len(name.columns) > 10 else ""
+                    current_l = str(name.iloc[idx, 17]) if len(name.columns) > 11 else ""
+    
+                    st.write("### Edit Rak dan Kolom")
+                    new_k = st.text_input("Rak:", current_k)
+                    new_l = st.text_input("Kolom:", current_l)
+    
+                    # okClean Kolom L automatically
+                    if new_l.strip():
+                        cleaned = re.sub(r"[-\s;]+", ",", new_l)
+                        cleaned = cleaned.replace(",,", ",").strip(",")
+                        parts = [p.strip() for p in cleaned.split(",") if p.strip()]
+                        new_l = ",".join([f'"{p}"' for p in parts])
+    
+                    # okSave button 
+                    if st.button("💾 Simpan Perubahan"):
+                        name.iat[idx, 16] = new_k
+                        name.iat[idx, 17] = new_l
+                        conn.update(worksheet=sheet_warehouse, data=name)
+                        st.success("✅ Data di WarehouseAlldata berhasil diperbarui!")
 
 st.markdown("---")
 st.header("🔍 Cari Berdasarkan Rak & Kolom")
@@ -450,6 +458,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
