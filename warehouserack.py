@@ -190,10 +190,11 @@ if "result" in st.session_state:
     result = st.session_state["result"]
 
     # Show table
-    st.dataframe(result.iloc[:, [7, 5, 6, 16, 17]].rename(
+    st.dataframe(result.iloc[:, [7, 5,4, 6, 16, 17]].rename(
         columns={
             name.columns[7]: "PO",
             name.columns[5]: "Kode",
+            name.columns[4]: "Item",
             name.columns[6]: "Material",
             name.columns[16]: "Rak",
             name.columns[17]: "Kolom",
@@ -215,6 +216,7 @@ if "result" in st.session_state:
         st.session_state["edit_fields"] = {
             "po": str(name.iloc[idx, 7]),
             "kode": str(name.iloc[idx, 5]),
+            "item": str(name.iloc[idx, 4]),
             "material": str(name.iloc[idx, 6]),
             "rak": str(name.iloc[idx, 16]),
             "kolom": str(name.iloc[idx, 17]),
@@ -225,6 +227,7 @@ if "result" in st.session_state:
     st.write("### ✏️ Edit Data di Rak & Kolom Ini")
     edit["po"] = st.text_input("PO:", edit["po"], key="po_edit")
     edit["kode"] = st.text_input("Kode:", edit["kode"], key="kode_edit")
+    edit["item"] = st.text_input("item:", edit["item"], key="item_edit")
     edit["material"] = st.text_input("Material:", edit["material"], key="mat_edit")
     edit["rak"] = st.text_input("Rak:", edit["rak"], key="rak_edit")
     edit["kolom"] = st.text_input("Kolom:", edit["kolom"], key="kol_edit")
@@ -243,6 +246,7 @@ if "result" in st.session_state:
         idx = st.session_state["chosen_idx"]
         name.iat[idx, 7] = edit["po"]
         name.iat[idx, 5] = edit["kode"]
+        name.iat[idx, 4] = edit["item"]
         name.iat[idx, 6] = edit["material"]
         name.iat[idx, 16] = edit["rak"]
         name.iat[idx, 17] = edit["kolom"]
@@ -458,6 +462,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
