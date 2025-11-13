@@ -149,14 +149,14 @@ st.markdown("---")
 st.header("🔍 Cari Berdasarkan Rak & Kolom")
 
 # --- Dropdown for Rak (Kolom K) ---
-rak_list = name.iloc[:, 10].dropna().astype(str).unique().tolist()
+rak_list = name.iloc[:, 16].dropna().astype(str).unique().tolist()
 rak_list.insert(0, "-")
 selected_rak = st.selectbox("Pilih Rak (Kolom K):", rak_list, key="rak_select")
 
 # --- Filter Kolom list based on selected Rak ---
 if selected_rak != "-":
-    filtered_for_rak = name[name.iloc[:, 10] == selected_rak]
-    kolom_list = filtered_for_rak.iloc[:, 11].dropna().astype(str).unique().tolist()
+    filtered_for_rak = name[name.iloc[:, 16] == selected_rak]
+    kolom_list = filtered_for_rak.iloc[:, 17].dropna().astype(str).unique().tolist()
     kolom_list.insert(0, "-")
 else:
     kolom_list = ["-"]
@@ -166,7 +166,7 @@ selected_kolom = st.selectbox("Pilih Kolom (Kolom L):", kolom_list, key="kolom_s
 # --- Show result button ---
 if st.button("🔎 Tampilkan Data"):
     if selected_rak != "-" and selected_kolom != "-":
-        result = name[(name.iloc[:, 10] == selected_rak) & (name.iloc[:, 11] == selected_kolom)]
+        result = name[(name.iloc[:, 16] == selected_rak) & (name.iloc[:, 17] == selected_kolom)]
 
         if not result.empty:
             st.session_state["result"] = result
@@ -208,8 +208,8 @@ if "result" in st.session_state:
             "po": str(name.iloc[idx, 1]),
             "kode": str(name.iloc[idx, 2]),
             "material": str(name.iloc[idx, 3]),
-            "rak": str(name.iloc[idx, 10]),
-            "kolom": str(name.iloc[idx, 11]),
+            "rak": str(name.iloc[idx, 16]),
+            "kolom": str(name.iloc[idx, 17]),
         }
 
     edit = st.session_state["edit_fields"]
@@ -236,8 +236,8 @@ if "result" in st.session_state:
         name.iat[idx, 1] = edit["po"]
         name.iat[idx, 2] = edit["kode"]
         name.iat[idx, 3] = edit["material"]
-        name.iat[idx, 10] = edit["rak"]
-        name.iat[idx, 11] = edit["kolom"]
+        name.iat[idx, 16] = edit["rak"]
+        name.iat[idx, 17] = edit["kolom"]
 
         conn.update(worksheet=sheet_warehouse, data=name)
 
@@ -450,6 +450,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
