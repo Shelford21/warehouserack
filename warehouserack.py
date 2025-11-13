@@ -124,8 +124,8 @@ if selected_name != "-":
                 idx = row_index[0]
 
                 # okShow current K and L values 
-                current_k = str(name.iloc[idx, 10]) if len(name.columns) > 10 else ""
-                current_l = str(name.iloc[idx, 11]) if len(name.columns) > 11 else ""
+                current_k = str(name.iloc[idx, 16]) if len(name.columns) > 10 else ""
+                current_l = str(name.iloc[idx, 17]) if len(name.columns) > 11 else ""
 
                 st.write("### Edit Rak dan Kolom")
                 new_k = st.text_input("Rak:", current_k)
@@ -140,8 +140,8 @@ if selected_name != "-":
 
                 # okSave button 
                 if st.button("💾 Simpan Perubahan"):
-                    name.iat[idx, 10] = new_k
-                    name.iat[idx, 11] = new_l
+                    name.iat[idx, 16] = new_k
+                    name.iat[idx, 17] = new_l
                     conn.update(worksheet=sheet_warehouse, data=name)
                     st.success("✅ Data di WarehouseAlldata berhasil diperbarui!")
 
@@ -450,6 +450,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
