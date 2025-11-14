@@ -57,7 +57,7 @@ st.markdown(
         <div class="transparent-container">
             <h1>✨ Rack Tracking System</h1>
             <h4>
-            Warehouse<br>💡 QTM 2025 💡
+            <br>💡 QTM 2025 💡
     </h4>
     
         """,
@@ -502,6 +502,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
