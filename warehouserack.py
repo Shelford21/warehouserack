@@ -48,7 +48,7 @@ CSV_FILE = "submissions.csv"
 # Set your admin password here
 ADMIN_PASSWORD = "mumi99"
 
-st.set_page_config(page_title="Warehouse",
+st.set_page_config(page_title="Rack Tracking System - Warehouse",
                    page_icon="✨",
                    layout="wide")
 
@@ -57,7 +57,7 @@ st.markdown(
         <div class="transparent-container">
             <h1>✨ Rack Tracking System</h1>
             <h4>
-            <br>💡 QTM 2025 💡
+            💡 QTM 2025 💡
     </h4>
     
         """,
@@ -502,6 +502,7 @@ st.markdown("---")
 # else:
 #     if admin_password != "":
 #         st.error("❌ Incorrect password.")
+
 
 
 
